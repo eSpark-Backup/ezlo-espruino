@@ -17,7 +17,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "jswrap_wifi.h"
+#include "../jswrap_wifi.h"
 
 void jswrap_ESP32_ping(
     JsVar *ipAddr,      //!< A string or integer representation of an IP address.
