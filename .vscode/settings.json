@@ -1,0 +1,8 @@
+{
+  "idf.adapterTargetName": "esp32",
+  "files.associations": {
+    "jsdevices.h": "c",
+    "w5500.h": "c",
+    "esp32_bluetooth_utils.h": "c"
+  }
+}

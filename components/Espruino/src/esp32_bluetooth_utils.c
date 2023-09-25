@@ -190,86 +190,94 @@ static char *gattcEvent2String(esp_gattc_cb_event_t event)
 {
   switch (event)
   {
-  case 0:
+  case ESP_GATTC_REG_EVT:
     return "REG";
-  case 1:
+  case ESP_GATTC_UNREG_EVT:
     return "UNREG";
-  case 2:
+  case ESP_GATTC_OPEN_EVT:
     return "OPEN";
-  case 3:
+  case ESP_GATTC_READ_CHAR_EVT:
     return "READ_CHAR";
-  case 4:
+  case ESP_GATTC_WRITE_CHAR_EVT:
     return "WRITE_CHAR";
-  case 5:
+  case ESP_GATTC_CLOSE_EVT:
     return "CLOSE";
-  case 6:
+  case ESP_GATTC_SEARCH_CMPL_EVT:
     return "SEARCH_CMPL";
-  case 7:
+  case ESP_GATTC_SEARCH_RES_EVT:
     return "SEARCH_RES";
-  case 8:
+  case ESP_GATTC_READ_DESCR_EVT:
     return "READ_DESCR";
-  case 9:
+  case ESP_GATTC_WRITE_DESCR_EVT:
     return "WRITE_DESCR";
-  case 10:
+  case ESP_GATTC_NOTIFY_EVT:
     return "NOTIFY";
-  case 11:
+  case ESP_GATTC_PREP_WRITE_EVT:
     return "PREP_WRITE";
-  case 12:
+  case ESP_GATTC_EXEC_EVT:
     return "EXEC";
-  case 13:
+  case ESP_GATTC_ACL_EVT:
     return "ACL";
-  case 14:
+  case ESP_GATTC_CANCEL_OPEN_EVT:
     return "CANCEL_OPEN";
-  case 15:
+  case ESP_GATTC_SRVC_CHG_EVT:
     return "SRVC_CHG";
-  case 17:
+  case ESP_GATTC_ENC_CMPL_CB_EVT:
     return "ENC_CMPL_CB";
-  case 18:
+  case ESP_GATTC_CFG_MTU_EVT:
     return "CFG_MTU";
-  case 19:
+  case ESP_GATTC_ADV_DATA_EVT:
     return "ADV_DATA";
-  case 20:
+  case ESP_GATTC_MULT_ADV_ENB_EVT:
     return "MULT_ADV_ENB";
-  case 21:
+  case ESP_GATTC_MULT_ADV_UPD_EVT:
     return "ADV_ADV_UPD";
-  case 22:
+  case ESP_GATTC_MULT_ADV_DATA_EVT:
     return "MULT_ADV_DATA";
-  case 23:
+  case ESP_GATTC_MULT_ADV_DIS_EVT:
     return "MULT_ADV_DIS";
-  case 24:
+  case ESP_GATTC_CONGEST_EVT:
     return "CONGEST";
-  case 25:
+  case ESP_GATTC_BTH_SCAN_ENB_EVT:
     return "BTH_SCAN_ENB";
-  case 26:
+  case ESP_GATTC_BTH_SCAN_CFG_EVT:
     return "BTH_SCAN_CFG";
-  case 27:
+  case ESP_GATTC_BTH_SCAN_RD_EVT:
     return "BTH_SCAN_RD";
-  case 28:
+  case ESP_GATTC_BTH_SCAN_THR_EVT:
     return "BTH_SCAN_THR";
-  case 29:
+  case ESP_GATTC_BTH_SCAN_PARAM_EVT:
     return "BTH_SCAN_PARAM";
-  case 30:
+  case ESP_GATTC_BTH_SCAN_DIS_EVT:
     return "BTH_SCAN_DIS";
-  case 31:
+  case ESP_GATTC_SCAN_FLT_CFG_EVT:
     return "SCAN_FLT_CFG";
-  case 32:
+  case ESP_GATTC_SCAN_FLT_PARAM_EVT:
     return "SCAN_FLT_PARAM";
-  case 33:
+  case ESP_GATTC_SCAN_FLT_STATUS_EVT:
     return "SCAN_FLT_STATUS";
-  case 34:
+  case ESP_GATTC_ADV_VSC_EVT:
     return "ADV_VSC";
-  case 38:
+  case ESP_GATTC_REG_FOR_NOTIFY_EVT:
     return "REG_FOR_NOTIFY";
-  case 39:
+  case ESP_GATTC_UNREG_FOR_NOTIFY_EVT:
     return "UNREG_FOR_NOTIFY";
-  case 40:
+  case ESP_GATTC_CONNECT_EVT:
     return "CONNECT";
-  case 41:
+  case ESP_GATTC_DISCONNECT_EVT:
     return "DISCONNECT";
-  case 42:
+  case ESP_GATTC_READ_MULTIPLE_EVT:
     return "READ_MUTIPLE";
-  case 43:
+  case ESP_GATTC_QUEUE_FULL_EVT:
     return "QUEUE_FULL";
+  case ESP_GATTC_SET_ASSOC_EVT:
+    return "SET_ASSOC";
+  case ESP_GATTC_GET_ADDR_LIST_EVT:
+    return "GET_ADDR_LIST";
+  case ESP_GATTC_DIS_SRVC_CMPL_EVT:
+    return "DIS_SRVC_CMPL";
+  case ESP_GATTC_READ_MULTI_VAR_EVT:
+    return "READ_MULTI_VAR";
   }
   return "unknown GattcEvent";
 }

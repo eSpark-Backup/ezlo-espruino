@@ -1,3 +1,0 @@
-(function() {
-  Bangle.load(".bootcde");
-})

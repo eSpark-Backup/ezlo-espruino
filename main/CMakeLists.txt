@@ -4,11 +4,14 @@
 
 file(GLOB_RECURSE SOURCES "./*.c*")
 
+#/add_subdirectory(components/Espruino)
+
+
 idf_component_register(SRCS ${SOURCES}
     INCLUDE_DIRS "."
     REQUIRES nvs_flash frozen wifi_interface web_provisioning websocket_client
     http factory_info certificates qt_serial interface_common debug
-    switch_service MPU6050_service bt json aes_lib esp_rom wss esp_system)
+    switch_service MPU6050_service bt json aes_lib esp_rom wss esp_system Espruino)
 
 # file( GLOB_RECURSE SOURCES "./*.cpp" )
 

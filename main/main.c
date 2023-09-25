@@ -27,7 +27,7 @@
 #include "wss.h"
 
 /******************** Espruino Js ***********************/
-#include <jsdevices.h>
+#include "jsdevices.h"
 #include <jsinteractive.h>
 #include "rtosutil.h"
 #include "jstimer.h"
