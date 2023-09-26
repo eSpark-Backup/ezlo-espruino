@@ -22,47 +22,52 @@
 #include "wizchip_conf.h"
 
 #include "network_wiznet.h"
-#include "DHCP/dhcp.h"
+#include "dhcp.h"
 
 // -------------------- defaults...
 #ifdef STM32
-#define ETH_SPI          EV_SPI3
-#define ETH_CS_PIN       (Pin)(JSH_PORTB_OFFSET + 2) // active low
-#define ETH_CLK_PIN      (Pin)(JSH_PORTB_OFFSET + 3)
-#define ETH_MISO_PIN     (Pin)(JSH_PORTB_OFFSET + 4)
-#define ETH_MOSI_PIN     (Pin)(JSH_PORTB_OFFSET + 5)
+#define ETH_SPI EV_SPI3
+#define ETH_CS_PIN (Pin)(JSH_PORTB_OFFSET + 2) // active low
+#define ETH_CLK_PIN (Pin)(JSH_PORTB_OFFSET + 3)
+#define ETH_MISO_PIN (Pin)(JSH_PORTB_OFFSET + 4)
+#define ETH_MOSI_PIN (Pin)(JSH_PORTB_OFFSET + 5)
 #endif
 // -------------------------------
 
-static char *state[] = { "offline", "connected", "online", "disconnect" };
-static char *phylink[] = {"down","up"};
-static char *phypowm[] = {"down","normal"};
+static char *state[] = {"offline", "connected", "online", "disconnect"};
+static char *phylink[] = {"down", "up"};
+static char *phypowm[] = {"down", "normal"};
 
-void  wizchip_select(void) {
+void wizchip_select(void)
+{
   assert(networkGetCurrent());
   jshPinOutput(networkGetCurrent()->data.pinCS, 0); // active low
 }
 
-void  wizchip_deselect(void) {
+void wizchip_deselect(void)
+{
   assert(networkGetCurrent());
   jshPinOutput(networkGetCurrent()->data.pinCS, 1); // active low
 }
 
-static uint8_t wizchip_rw(uint8_t data) {
+static uint8_t wizchip_rw(uint8_t data)
+{
   assert(networkGetCurrent());
   int r = jshSPISend(networkGetCurrent()->data.device, data);
-  if (r<0) r = jshSPISend(networkGetCurrent()->data.device, -1);
+  if (r < 0)
+    r = jshSPISend(networkGetCurrent()->data.device, -1);
   return (uint8_t)r;
 }
 
-void  wizchip_write(uint8_t wb) {
+void wizchip_write(uint8_t wb)
+{
   wizchip_rw(wb);
 }
 
-uint8_t wizchip_read() {
-   return wizchip_rw(0xFF);
+uint8_t wizchip_read()
+{
+  return wizchip_rw(0xFF);
 }
-
 
 /*JSON{
   "type" : "library",
@@ -86,21 +91,26 @@ Library for communication with the WIZnet Ethernet module
 }
 Initialise the WIZnet module and return an Ethernet object
 */
-JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs) {
+JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs)
+{
 
   IOEventFlags spiDevice;
-  if (spi) {
+  if (spi)
+  {
     spiDevice = jsiGetDeviceFromClass(spi);
-    if (!DEVICE_IS_SPI(spiDevice)) {
+    if (!DEVICE_IS_SPI(spiDevice))
+    {
       jsExceptionHere(JSET_ERROR, "Expecting SPI device, got %q", spi);
       return 0;
     }
-  } else {
+  }
+  else
+  {
 #ifdef ETH_SPI
     // SPI config
     JshSPIInfo inf;
     jshSPIInitInfo(&inf);
-    inf.pinSCK =  ETH_CLK_PIN;
+    inf.pinSCK = ETH_CLK_PIN;
     inf.pinMISO = ETH_MISO_PIN;
     inf.pinMOSI = ETH_MOSI_PIN;
     inf.baudRate = 1000000;
@@ -135,9 +145,9 @@ JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs) {
 
   /* wizchip initialize*/
   uint8_t tmp;
-  uint8_t memsize[2][8] = { {2,2,2,2,2,2,2,2}, {2,2,2,2,2,2,2,2}};
+  uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
 
-  if(ctlwizchip(CW_INIT_WIZCHIP,(void*)memsize) == -1)
+  if (ctlwizchip(CW_INIT_WIZCHIP, (void *)memsize) == -1)
   {
     jsiConsolePrint("WIZnet Initialize failed.\r\n");
     networkFree(&net);
@@ -146,8 +156,10 @@ JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs) {
 
 #if _WIZCHIP_ == 5500
   /* PHY link status check - W5100 doesn't have this */
-  do {
-    if(ctlwizchip(CW_GET_PHYLINK, (void*)&tmp) == -1) {
+  do
+  {
+    if (ctlwizchip(CW_GET_PHYLINK, (void *)&tmp) == -1)
+    {
       jsiConsolePrint("Unknown PHY Link status.\r\n");
       networkFree(&net);
       return 0;
@@ -183,26 +195,30 @@ An instantiation of an Ethernet network adaptor
 }
 Get the current IP address, subnet, gateway and mac address.
 */
-JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback) {
+JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback)
+{
   NOT_USED(wlanObj);
 
-  if (networkState != NETWORKSTATE_ONLINE) {
+  if (networkState != NETWORKSTATE_ONLINE)
+  {
     jsExceptionHere(JSET_ERROR, "Not connected to the internet");
     return 0;
   }
 
   JsNetwork net;
-  if (!networkGetFromVar(&net)) return 0;
+  if (!networkGetFromVar(&net))
+    return 0;
 
   wiz_NetInfo gWIZNETINFO;
-  ctlnetwork(CN_GET_NETINFO, (void*)&gWIZNETINFO);
+  ctlnetwork(CN_GET_NETINFO, (void *)&gWIZNETINFO);
 
   /* If byte 1 is 0 we don't have a valid address */
   JsVar *data = jsvNewObject();
   networkPutAddressAsString(data, "ip", &gWIZNETINFO.ip[0], 4, 10, '.');
   networkPutAddressAsString(data, "subnet", &gWIZNETINFO.sn[0], 4, 10, '.');
   networkPutAddressAsString(data, "gateway", &gWIZNETINFO.gw[0], 4, 10, '.');
-  if ( !gWIZNETINFO.gw[0] ) {
+  if (!gWIZNETINFO.gw[0])
+  {
     gWIZNETINFO.dns[0] = gWIZNETINFO.dns[1] = gWIZNETINFO.dns[2] = gWIZNETINFO.dns[3] = 0;
   }
   networkPutAddressAsString(data, "dns", &gWIZNETINFO.dns[0], 4, 10, '.');
@@ -211,7 +227,8 @@ JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback) {
   networkFree(&net);
 
   // Schedule callback if a function was provided
-  if (jsvIsFunction(callback)) {
+  if (jsvIsFunction(callback))
+  {
     JsVar *params[2];
     params[0] = jsvNewWithFlags(JSV_NULL);
     params[1] = data;
@@ -222,13 +239,14 @@ JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback) {
   return data;
 }
 
-
-static void _eth_getIP_set_address(JsVar *options, char *name, unsigned char *ptr) {
+static void _eth_getIP_set_address(JsVar *options, char *name, unsigned char *ptr)
+{
   JsVar *info = jsvObjectGetChildIfExists(options, name);
-  if (info) {
+  if (info)
+  {
     char buf[64];
     jsvGetString(info, buf, sizeof(buf));
-    *(unsigned long*)ptr = networkParseIPAddress(buf);
+    *(unsigned long *)ptr = networkParseIPAddress(buf);
     jsvUnLock(info);
   }
 }
@@ -251,42 +269,48 @@ specified)
 If 'mac' is specified as an option, it must be a string of the form
 `"00:01:02:03:04:05"` The default mac is 00:08:DC:01:02:03.
 */
-bool jswrap_ethernet_setIP(JsVar *wlanObj, JsVar *options, JsVar *callback) {
+bool jswrap_ethernet_setIP(JsVar *wlanObj, JsVar *options, JsVar *callback)
+{
   NOT_USED(wlanObj);
 
-  if (networkState != NETWORKSTATE_ONLINE) {
+  if (networkState != NETWORKSTATE_ONLINE)
+  {
     jsExceptionHere(JSET_ERROR, "Not connected to the internet");
     return false;
   }
 
   JsNetwork net;
-  if (!networkGetFromVar(&net)) return false;
+  if (!networkGetFromVar(&net))
+    return false;
 
   const char *errorMessage = 0;
   wiz_NetInfo gWIZNETINFO;
 
-  ctlnetwork(CN_GET_NETINFO, (void*)&gWIZNETINFO);
+  ctlnetwork(CN_GET_NETINFO, (void *)&gWIZNETINFO);
   if (!gWIZNETINFO.mac[0] && !gWIZNETINFO.mac[1] &&
       !gWIZNETINFO.mac[2] && !gWIZNETINFO.mac[3] &&
-      !gWIZNETINFO.mac[4] && !gWIZNETINFO.mac[5]) {
+      !gWIZNETINFO.mac[4] && !gWIZNETINFO.mac[5])
+  {
     // wow - no mac address - WIZ550BoB? Set up a simple one
     // in WIZnet's range of addresses
-    gWIZNETINFO.mac[0]=0x00;
-    gWIZNETINFO.mac[1]=0x08;
-    gWIZNETINFO.mac[2]=0xDC;
-    gWIZNETINFO.mac[3]=0x01;
-    gWIZNETINFO.mac[4]=0x02;
-    gWIZNETINFO.mac[5]=0x03;
+    gWIZNETINFO.mac[0] = 0x00;
+    gWIZNETINFO.mac[1] = 0x08;
+    gWIZNETINFO.mac[2] = 0xDC;
+    gWIZNETINFO.mac[3] = 0x01;
+    gWIZNETINFO.mac[4] = 0x02;
+    gWIZNETINFO.mac[5] = 0x03;
   }
 
-  if (jsvIsObject(options)) {
+  if (jsvIsObject(options))
+  {
     _eth_getIP_set_address(options, "ip", &gWIZNETINFO.ip[0]);
     _eth_getIP_set_address(options, "subnet", &gWIZNETINFO.sn[0]);
     _eth_getIP_set_address(options, "gateway", &gWIZNETINFO.gw[0]);
     _eth_getIP_set_address(options, "dns", &gWIZNETINFO.dns[0]);
 
     JsVar *info = jsvObjectGetChildIfExists(options, "mac");
-    if (info) {
+    if (info)
+    {
       char buf[64];
       jsvGetString(info, buf, sizeof(buf));
       networkParseMACAddress(&gWIZNETINFO.mac[0], buf);
@@ -296,30 +320,36 @@ bool jswrap_ethernet_setIP(JsVar *wlanObj, JsVar *options, JsVar *callback) {
 
     gWIZNETINFO.dhcp = NETINFO_STATIC;
     errorMessage = 0; // all ok
-  } else {
+  }
+  else
+  {
     // DHCP
     uint8_t DHCPisSuccess = getIP_DHCPS(net_wiznet_getFreeSocket(), &gWIZNETINFO);
-    if (DHCPisSuccess == 1) {
+    if (DHCPisSuccess == 1)
+    {
       // info in lease_time.lVal
       errorMessage = 0; // all ok
-    } else {
+    }
+    else
+    {
       errorMessage = "DHCP failed";
       jsWarn(errorMessage);
     }
   }
 
-  ctlnetwork(CN_SET_NETINFO, (void*)&gWIZNETINFO);
+  ctlnetwork(CN_SET_NETINFO, (void *)&gWIZNETINFO);
 
   networkFree(&net);
 
   // Schedule callback if a function was provided
-  if (jsvIsFunction(callback)) {
+  if (jsvIsFunction(callback))
+  {
     JsVar *params[1];
     params[0] = errorMessage ? jsvNewFromString(errorMessage) : jsvNewWithFlags(JSV_NULL);
     jsiQueueEvents(NULL, callback, params, 1);
     jsvUnLock(params[0]);
   }
-  return errorMessage==0;
+  return errorMessage == 0;
 }
 
 /*JSON{
@@ -338,28 +368,32 @@ Set hostname used during the DHCP request. Minimum 8 and maximum 12 characters,
 best set before calling `eth.setIP()`. Default is WIZnet010203, 010203 is the
 default nic as part of the mac.
 */
-bool jswrap_ethernet_setHostname(JsVar *wlanObj, JsVar *jsHostname, JsVar *callback){
+bool jswrap_ethernet_setHostname(JsVar *wlanObj, JsVar *jsHostname, JsVar *callback)
+{
   NOT_USED(wlanObj);
   char hostname[13];
   const char *errorMessage = 0;
 
   jsvGetString(jsHostname, hostname, sizeof(hostname));
 
-  if (strlen(hostname) < 8) {
+  if (strlen(hostname) < 8)
+  {
     errorMessage = "hostname too short (min 8 and max 12 char )";
   }
-  else {
+  else
+  {
     setHostname(hostname);
   }
 
   // Schedule callback if a function was provided
-  if (jsvIsFunction(callback)) {
+  if (jsvIsFunction(callback))
+  {
     JsVar *params[1];
     params[0] = errorMessage ? jsvNewFromString(errorMessage) : jsvNewWithFlags(JSV_NULL);
     jsiQueueEvents(NULL, callback, params, 1);
     jsvUnLock(params[0]);
   }
-  return errorMessage==0;
+  return errorMessage == 0;
 }
 
 /*JSON{
@@ -375,13 +409,15 @@ bool jswrap_ethernet_setHostname(JsVar *wlanObj, JsVar *jsHostname, JsVar *callb
 }
 Returns the hostname
 */
-JsVar * jswrap_ethernet_getHostname(JsVar *wlanObj, JsVar *callback) {
+JsVar *jswrap_ethernet_getHostname(JsVar *wlanObj, JsVar *callback)
+{
   NOT_USED(wlanObj);
   const char *errorMessage = 0;
   char *hostname = getHostname();
 
   // Schedule callback if a function was provided
-  if (jsvIsFunction(callback)) {
+  if (jsvIsFunction(callback))
+  {
     JsVar *params[2];
     params[0] = errorMessage ? jsvNewFromString(errorMessage) : jsvNewWithFlags(JSV_NULL);
     params[1] = jsvNewFromString(hostname);
@@ -405,46 +441,51 @@ JsVar * jswrap_ethernet_getHostname(JsVar *wlanObj, JsVar *callback) {
 Get the current status of the ethernet device
 
 */
-JsVar * jswrap_ethernet_getStatus( JsVar *wlanObj, JsVar *callback) {
+JsVar *jswrap_ethernet_getStatus(JsVar *wlanObj, JsVar *callback)
+{
   NOT_USED(wlanObj);
 
   uint8_t tmp;
-  uint8_t tmpstr[6] = {0,};
+  uint8_t tmpstr[6] = {
+      0,
+  };
 
   JsNetwork net;
-  if (!networkGetFromVar(&net)) return 0;
+  if (!networkGetFromVar(&net))
+    return 0;
 
   JsVar *jsStatus = jsvNewObject();
 
   jsvObjectSetChildAndUnLock(jsStatus, "state", jsvNewFromString(state[networkState]));
 
-  ctlwizchip(CW_GET_ID,(void*)tmpstr);  
-  jsvObjectSetChildAndUnLock(jsStatus, "id",jsvNewFromString(tmpstr));
+  ctlwizchip(CW_GET_ID, (void *)tmpstr);
+  jsvObjectSetChildAndUnLock(jsStatus, "id", jsvNewFromString((char *)tmpstr));
 
-  ctlwizchip(CW_GET_PHYLINK, (void*)&tmp);
+  ctlwizchip(CW_GET_PHYLINK, (void *)&tmp);
   jsvObjectSetChildAndUnLock(jsStatus, "phylink", jsvNewFromString(phylink[tmp]));
-  
-  ctlwizchip(CW_GET_PHYPOWMODE,(void*)&tmp);
+
+  ctlwizchip(CW_GET_PHYPOWMODE, (void *)&tmp);
   jsvObjectSetChildAndUnLock(jsStatus, "phypowmode", jsvNewFromString(phypowm[tmp]));
 
-#if  _WIZCHIP_ == 5500 
+#if _WIZCHIP_ == 5500
   wiz_PhyConf tmpPhycConf;
-  ctlwizchip(CW_GET_PHYCONF,(void*)&tmpPhycConf);
+  ctlwizchip(CW_GET_PHYCONF, (void *)&tmpPhycConf);
   jsvObjectSetChildAndUnLock(jsStatus, "by", jsvNewFromInteger(tmpPhycConf.by));
   jsvObjectSetChildAndUnLock(jsStatus, "mode", jsvNewFromInteger(tmpPhycConf.mode));
-  jsvObjectSetChildAndUnLock(jsStatus, "speed",  tmpPhycConf.speed ? jsvNewFromInteger(10) :  jsvNewFromInteger(100));
+  jsvObjectSetChildAndUnLock(jsStatus, "speed", tmpPhycConf.speed ? jsvNewFromInteger(10) : jsvNewFromInteger(100));
   jsvObjectSetChildAndUnLock(jsStatus, "duplex", jsvNewFromInteger(tmpPhycConf.duplex));
 #endif
 
   networkFree(&net);
 
   // Schedule callback if a function was provided
-  if (jsvIsFunction(callback)) {
+  if (jsvIsFunction(callback))
+  {
     JsVar *params[2];
     params[0] = jsvNewWithFlags(JSV_NULL);
     params[1] = jsStatus;
     jsiQueueEvents(NULL, callback, params, 2);
     jsvUnLock(params[0]);
-  } 
+  }
   return jsStatus;
 }

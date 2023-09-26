@@ -156,8 +156,8 @@ void send_DHCP_DISCOVER(uint8_t s, wiz_NetInfo *pWIZNETINFO)
 	}
 	else
 	{
-		MSG.OPT[k++] = strlen(HOST_NAME);
-		for (i = 0; i < strlen(HOST_NAME); i++)
+		MSG.OPT[k++] = strlen((char *)HOST_NAME);
+		for (i = 0; i < strlen((char *)HOST_NAME); i++)
 		{
 			MSG.OPT[k++] = HOST_NAME[i];
 		}
@@ -301,7 +301,7 @@ void send_DHCP_REQUEST(uint8_t s, uint8_t *Cip, uint8_t *d_addr, wiz_NetInfo *pW
 	MSG.OPT[k++] = (*pWIZNETINFO).mac[4];
 	MSG.OPT[k++] = (*pWIZNETINFO).mac[5];
 	*/
-	if (strcmp(DHCP_HOST_NAME, HOST_NAME) == 0)
+	if (strcmp(DHCP_HOST_NAME, (char *)HOST_NAME) == 0)
 	{					   // If Default Host Name.
 		MSG.OPT[k++] = 12; // length of hostname
 		MSG.OPT[k++] = HOST_NAME[0];
@@ -319,8 +319,8 @@ void send_DHCP_REQUEST(uint8_t s, uint8_t *Cip, uint8_t *d_addr, wiz_NetInfo *pW
 	}
 	else
 	{
-		MSG.OPT[k++] = strlen(HOST_NAME);
-		for (i = 0; i < strlen(HOST_NAME); i++)
+		MSG.OPT[k++] = strlen((char *)HOST_NAME);
+		for (i = 0; i < strlen((char *)HOST_NAME); i++)
 		{
 			MSG.OPT[k++] = HOST_NAME[i];
 		}
@@ -478,7 +478,7 @@ int8_t parseDHCPMSG(uint8_t s, uint16_t length, wiz_NetInfo *pWIZNETINFO)
 	uint16_t i, len;
 	uint8_t *p;
 	uint8_t *e;
-	uint8_t type, opt_len;
+	uint8_t type = 0, opt_len = 0;
 
 	//*************
 	// Add James Kim for IWatchDog
@@ -916,13 +916,13 @@ uint8_t getIP_DHCPS(uint8_t s, wiz_NetInfo *pWIZNETINFO)
 
 uint8_t setHostname(char *hostname)
 {
-	strcpy(HOST_NAME, hostname);
+	strcpy((char *)HOST_NAME, hostname);
 	return 0;
 }
 
 char *getHostname()
 {
-	return HOST_NAME;
+	return (char *)HOST_NAME;
 }
 
 char nibbleToHex(uint8_t nibble)

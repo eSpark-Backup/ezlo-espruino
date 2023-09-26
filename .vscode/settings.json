@@ -3,6 +3,9 @@
   "files.associations": {
     "jsdevices.h": "c",
     "w5500.h": "c",
-    "esp32_bluetooth_utils.h": "c"
+    "esp32_bluetooth_utils.h": "c",
+    "functional": "c",
+    "system_error": "c",
+    "xtr1common": "c"
   }
 }

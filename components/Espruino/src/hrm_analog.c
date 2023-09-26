@@ -17,13 +17,14 @@
 #include "jshardware.h"
 #include "jsinteractive.h"
 #include "jstimer.h"
-
+#ifdef NRF_52
 #include "nrf_saadc.h"
 
 HrmCallback hrmCallback;
 uint16_t hrmPollInterval = HRM_POLL_INTERVAL_DEFAULT; // in msec, so 20 = 50hz
 
-void hrm_timer() {
+void hrm_timer()
+{
   extern nrf_saadc_value_t nrf_analog_read();
   extern bool nrf_analog_read_start();
   extern void nrf_analog_read_end(bool adcInUse);
@@ -44,7 +45,8 @@ void hrm_timer() {
 
   // make reading
   int v;
-  do {
+  do
+  {
     nrf_analog_read_interrupted = false;
     nrf_saadc_enable();
     nrf_saadc_resolution_set(NRF_SAADC_RESOLUTION_8BIT);
@@ -58,42 +60,52 @@ void hrm_timer() {
   hrmCallback(v);
 }
 
-static void hrm_sensor_timer_start() {
+static void hrm_sensor_timer_start()
+{
   JsSysTime t = jshGetTimeFromMilliseconds(hrmPollInterval);
   jstExecuteFn(hrm_timer, NULL, t, t, NULL);
 }
 
-static void hrm_sensor_timer_stop() {
+static void hrm_sensor_timer_stop()
+{
   jstStopExecuteFn(hrm_timer, 0);
 }
 
-void hrm_sensor_on(HrmCallback callback) {
+void hrm_sensor_on(HrmCallback callback)
+{
   hrmCallback = callback;
   jshPinAnalog(HEARTRATE_PIN_ANALOG);
   hrm_sensor_timer_start();
 }
 
-void hrm_sensor_off() {
+void hrm_sensor_off()
+{
   hrm_sensor_timer_stop();
   hrmCallback = NULL;
 }
 
-JsVar *hrm_sensor_getJsVar() {
+JsVar *hrm_sensor_getJsVar()
+{
   JsVar *o = jsvNewObject();
-  if (o) {
+  if (o)
+  {
     // add custom info here
   }
   return o;
 }
 
 /// Called when JS engine torn down (disable timer/watch/etc)
-void hrm_sensor_kill() {
-  if (hrmCallback!=NULL) // if is running
+void hrm_sensor_kill()
+{
+  if (hrmCallback != NULL) // if is running
     hrm_sensor_timer_stop();
 }
 
 /// Called when JS engine initialised
-void hrm_sensor_init() {
-  if (hrmCallback!=NULL) // if is running
+void hrm_sensor_init()
+{
+  if (hrmCallback != NULL) // if is running
     hrm_sensor_timer_start();
 }
+
+#endif

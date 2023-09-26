@@ -22,12 +22,13 @@
 #include "jshardware.h"
 #include "jsinteractive.h"
 #include "algo.h"
-
+#ifdef NRF52
 HrmInfo hrmInfo;
 
 /// Initialise heart rate monitoring
 void hrm_init()
 {
+
   memset(&hrmInfo, 0, sizeof(hrmInfo));
   hrmInfo.isWorn = false;
   hrmInfo.lastPPGTime = jshGetSystemTime();
@@ -102,3 +103,4 @@ void hrm_get_hrm_info(JsVar *o)
 void hrm_get_hrm_raw_info(JsVar *o)
 {
 }
+#endif
