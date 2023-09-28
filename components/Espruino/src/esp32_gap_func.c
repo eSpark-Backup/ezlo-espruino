@@ -362,7 +362,7 @@ esp_err_t bluetooth_setDeviceName(JsVar *deviceName)
   esp_err_t r;
   jsvObjectSetOrRemoveChild(execInfo.hiddenRoot, BLE_DEVICE_NAME, deviceName);
   JSV_GET_AS_CHAR_ARRAY(namePtr, nameLen, deviceName);
-  r = esp_ble_gap_set_device_name((uint8_t *)namePtr);
+  r = esp_ble_gap_set_device_name((char *)namePtr);
   return r;
 }
 

@@ -18,6 +18,8 @@
 #include "platform_config.h"
 #include "jsvar.h"
 
+#define USE_TELNET
+
 #define BLUETOOTH
 
 /** Initialize any device-specific structures, like flow control states.
@@ -119,7 +121,7 @@ typedef enum
   EV_CHARS_ONE = EV_TYPE_MASK + 1,
   EV_CHARS_SHIFT = GET_BIT_NUMBER(EV_CHARS_ONE),
   EV_CHARS_MASK = 3 * EV_CHARS_ONE, // see IOEVENT_MAXCHARS
-  // ----------------------------------------- SERIAL STATUS
+                                    // ----------------------------------------- SERIAL STATUS
   EV_SERIAL_STATUS_FRAMING_ERR = EV_TYPE_MASK + 1,
   EV_SERIAL_STATUS_PARITY_ERR = EV_SERIAL_STATUS_FRAMING_ERR << 1,
   // ----------------------------------------- WATCH EVENTS

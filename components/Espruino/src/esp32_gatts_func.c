@@ -710,8 +710,10 @@ void gatts_structs_init(bool enableUART)
 }
 void gatts_getAdvServiceUUID(uint8_t *p_service_uuid, uint16_t service_len)
 {
-  p_service_uuid = adv_service_uuid128;
-  service_len = 16 * ble_service_cnt - 16;
+  if (p_service_uuid == NULL)
+    p_service_uuid = adv_service_uuid128;
+  if (service_len == NULL)
+    service_len = 16 * ble_service_cnt - 16;
 }
 
 // Actually allocates gatts_services with enough space

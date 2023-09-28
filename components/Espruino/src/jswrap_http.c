@@ -18,7 +18,7 @@
 #include "jsvariterator.h"
 #include "socketserver.h"
 
-#include "../network.h"
+#include "network.h"
 
 /*JSON{
   "type" : "library",
@@ -70,7 +70,6 @@ will be stored in an internal buffer, where it can be retrieved with `X.read()`
 Called when the connection closes.
 */
 
-
 /*JSON{
     "type" : "property",
     "class" : "httpSRq",
@@ -79,7 +78,8 @@ Called when the connection closes.
     "return" : ["JsVar", "An object mapping header name to value" ]
 }
 The headers to sent to the server with this HTTP request.
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
     "type" : "property",
     "class" : "httpSRq",
@@ -88,7 +88,8 @@ The headers to sent to the server with this HTTP request.
     "return" : ["JsVar", "A string" ]
 }
 The HTTP method used with this request. Often `"GET"`.
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
     "type" : "property",
     "class" : "httpSRq",
@@ -100,7 +101,8 @@ The URL requested in this HTTP request, for instance:
 
 * `"/"` - the main page
 * `"/favicon.ico"` - the web page's icon
-*//*Documentation only*/
+*/
+/*Documentation only*/
 
 /*JSON{
   "type" : "method",
@@ -234,7 +236,8 @@ conclude the HTTP request/response.
     "return" : ["JsVar", "An object mapping header name to value" ]
 }
 The headers received along with the HTTP response
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
     "type" : "property",
     "class" : "httpCRs",
@@ -243,7 +246,8 @@ The headers received along with the HTTP response
     "return" : ["JsVar", "The status code as a String" ]
 }
 The HTTP response's status code - usually `"200"` if all went well
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
     "type" : "property",
     "class" : "httpCRs",
@@ -252,7 +256,8 @@ The HTTP response's status code - usually `"200"` if all went well
     "return" : ["JsVar", "An String Status Message" ]
 }
 The HTTP response's status message - Usually `"OK"` if all went well
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
     "type" : "property",
     "class" : "httpCRs",
@@ -261,7 +266,8 @@ The HTTP response's status message - Usually `"OK"` if all went well
     "return" : ["JsVar", "Th" ]
 }
 The HTTP version reported back by the server - usually `"1.1"`
-*//*Documentation only*/
+*/
+/*Documentation only*/
 /*JSON{
   "type" : "method",
   "class" : "httpCRs",
@@ -299,11 +305,6 @@ Return a string containing characters that have been received
 Pipe this to a stream (an object with a 'write' method)
 */
 
-
-
-
-
-
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
@@ -326,9 +327,11 @@ you can use the methods on the response (`httpSRs`) to send data. You can also
 add `request.on('data',function() { ... })` to listen for POSTed data
 */
 
-JsVar *jswrap_http_createServer(JsVar *callback) {
+JsVar *jswrap_http_createServer(JsVar *callback)
+{
   JsVar *skippedCallback = jsvSkipName(callback);
-  if (!jsvIsFunction(skippedCallback)) {
+  if (!jsvIsFunction(skippedCallback))
+  {
     jsError("Expecting Callback Function but got %t", skippedCallback);
     jsvUnLock(skippedCallback);
     return 0;
@@ -413,23 +416,28 @@ require("http").get("http://pur3.co.uk/hello.txt", function(res) {
 See `http.request()` and [the Internet page](/Internet) and ` for more usage
 examples.
 */
-JsVar *jswrap_http_get(JsVar *options, JsVar *callback) {
+JsVar *jswrap_http_get(JsVar *options, JsVar *callback)
+{
   JsNetwork net;
-  if (!networkGetFromVarIfOnline(&net)) return 0;
+  if (!networkGetFromVarIfOnline(&net))
+    return 0;
 
-  if (jsvIsObject(options)) {
+  if (jsvIsObject(options))
+  {
     // if options is a string - it will be parsed, and GET will be set automatically
     jsvObjectSetChildAndUnLock(options, "method", jsvNewFromString("GET"));
   }
   JsVar *skippedCallback = jsvSkipName(callback);
-  if (!jsvIsUndefined(skippedCallback) && !jsvIsFunction(skippedCallback)) {
+  if (!jsvIsUndefined(skippedCallback) && !jsvIsFunction(skippedCallback))
+  {
     jsError("Expecting Callback Function but got %t", skippedCallback);
     jsvUnLock(skippedCallback);
     return 0;
   }
   jsvUnLock(skippedCallback);
   JsVar *cliReq = jswrap_net_connect(options, callback, ST_HTTP);
-  if (cliReq) clientRequestEnd(&net, cliReq);
+  if (cliReq)
+    clientRequestEnd(&net, cliReq);
   networkFree(&net);
   return cliReq;
 }
@@ -462,7 +470,6 @@ Stop listening for new HTTP connections
 */
 // Re-use existing
 
-
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
@@ -483,7 +490,8 @@ The default contents are:
   "Connection": "close"
  }
 ```
-*//*Documentation only*/
+*/
+/*Documentation only*/
 
 /*JSON{
   "type" : "method",
@@ -500,7 +508,8 @@ This function writes the `data` argument as a string. Data that is passed in
 `toString` method. For more information about sending binary data see
 `Socket.write`
 */
-bool jswrap_httpSRs_write(JsVar *parent, JsVar *data) {
+bool jswrap_httpSRs_write(JsVar *parent, JsVar *data)
+{
   serverResponseWrite(parent, data);
   return false;
 }
@@ -516,11 +525,12 @@ bool jswrap_httpSRs_write(JsVar *parent, JsVar *data) {
 }
 See `Socket.write` for more information about the data argument
 */
-void jswrap_httpSRs_end(JsVar *parent, JsVar *data) {
-  if (!jsvIsUndefined(data)) jswrap_httpSRs_write(parent, data);
+void jswrap_httpSRs_end(JsVar *parent, JsVar *data)
+{
+  if (!jsvIsUndefined(data))
+    jswrap_httpSRs_write(parent, data);
   serverResponseEnd(parent);
 }
-
 
 /*JSON{
   "type" : "method",
@@ -538,7 +548,8 @@ done automatically the first time data is written to the response.
 This cannot be called twice, or after data has already been sent in the
 response.
 */
-void jswrap_httpSRs_writeHead(JsVar *parent, int statusCode, JsVar *headers) {
+void jswrap_httpSRs_writeHead(JsVar *parent, int statusCode, JsVar *headers)
+{
   serverResponseWriteHead(parent, statusCode, headers);
 }
 
@@ -558,7 +569,8 @@ Set a value to send in the header of this HTTP response. This updates the
 Any headers supplied to `writeHead` will overwrite any headers with the same
 name.
 */
-void jswrap_httpSRs_setHeader(JsVar *parent, JsVar *name, JsVar *value) {
+void jswrap_httpSRs_setHeader(JsVar *parent, JsVar *name, JsVar *value)
+{
   serverResponseSetHeader(parent, name, value);
 }
 
@@ -597,5 +609,3 @@ Finish this HTTP request - optional data to append as an argument
 See `Socket.write` for more information about the data argument
 */
 // Re-use existing
-
-

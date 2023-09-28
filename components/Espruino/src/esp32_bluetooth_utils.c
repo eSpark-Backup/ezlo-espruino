@@ -14,6 +14,7 @@
 
 #include "esp32_bluetooth_utils.h"
 #include "esp32_gap_func.h"
+#include <esp_gap_ble_api.h>
 #include "esp32_gatts_func.h"
 #include "esp32_gattc_func.h"
 #include "esp_bt.h"
@@ -276,8 +277,6 @@ static char *gattcEvent2String(esp_gattc_cb_event_t event)
     return "GET_ADDR_LIST";
   case ESP_GATTC_DIS_SRVC_CMPL_EVT:
     return "DIS_SRVC_CMPL";
-  case ESP_GATTC_READ_MULTIPLE_EVT:
-    return "READ_MULTI_EVT";
   }
   return "unknown GattcEvent";
 }
