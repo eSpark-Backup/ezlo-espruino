@@ -14,24 +14,28 @@
 #ifndef GATTS_FUNC_H_
 #define GATTS_FUNC_H_
 
+#include "DeviceConfig.h"
 #include "esp_gatts_api.h"
 #include "jsvar.h"
 #include "bluetooth.h"
 
-#define GATTS_CHAR_VAL_LEN_MAX    22 // maximum length in bytes of a characteristic's value. TODO: find out how to determine this value?
+#define GATTS_CHAR_VAL_LEN_MAX 22 // maximum length in bytes of a characteristic's value. TODO: find out how to determine this value?
 
-typedef enum {
+typedef enum
+{
   BLE_SERVICE_GENERAL = 0,
   BLE_SERVICE_NUS = 1
 } BLEServiceFlags;
 
-typedef enum {
+typedef enum
+{
   BLE_CHAR_GENERAL = 0,
   BLE_CHAR_UART_RX = 1,
   BLE_CHAR_UART_TX = 2
 } BLECharFlags;
 
-struct gatts_service_inst {
+struct gatts_service_inst
+{
   uint16_t gatts_if;
   uint16_t app_id;
   uint16_t conn_id;
@@ -44,7 +48,8 @@ struct gatts_service_inst {
   BLEServiceFlags serviceFlag;
 };
 
-struct gatts_char_inst {
+struct gatts_char_inst
+{
   uint32_t service_pos;
   esp_bt_uuid_t char_uuid;
   esp_gatt_perm_t char_perm;
@@ -55,7 +60,8 @@ struct gatts_char_inst {
   BLECharFlags charFlag;
 };
 
-struct gatts_descr_inst {
+struct gatts_descr_inst
+{
   uint32_t char_pos;
   esp_bt_uuid_t descr_uuid;
   esp_gatt_perm_t descr_perm;

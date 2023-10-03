@@ -6,6 +6,7 @@
     "esp32_bluetooth_utils.h": "c",
     "functional": "c",
     "system_error": "c",
-    "xtr1common": "c"
+    "xtr1common": "c",
+    "esp32_gap_func.h": "c"
   }
 }

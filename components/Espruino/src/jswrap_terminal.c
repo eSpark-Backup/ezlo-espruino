@@ -32,6 +32,9 @@ When data is sent to the `Terminal` object, `Graphics.getInstance()` is called
 and if an instance of `Graphics` is found then characters are written to it.
 */
 
+#define LCD_WIDTH 84
+#define LCD_HEIGHT 48
+
 #ifdef USE_FONT_6X8
 #define TERMINAL_CHAR_W (6)
 #define TERMINAL_CHAR_H (8)
@@ -45,37 +48,40 @@ and if an instance of `Graphics` is found then characters are written to it.
 #endif
 
 #ifdef LCD_HEIGHT
-#define TERMINAL_HEIGHT (LCD_HEIGHT/TERMINAL_CHAR_H)
-#define TERMINAL_OFFSET_Y (LCD_HEIGHT-(TERMINAL_HEIGHT*TERMINAL_CHAR_H))
+#define TERMINAL_HEIGHT (LCD_HEIGHT / TERMINAL_CHAR_H)
+#define TERMINAL_OFFSET_Y (LCD_HEIGHT - (TERMINAL_HEIGHT * TERMINAL_CHAR_H))
 #else
 #define TERMINAL_HEIGHT (10)
 #define TERMINAL_OFFSET_Y (4)
 #endif
 #define TERMINAL_OFFSET_X (0)
 
-
 char terminalControlChars[4];
 unsigned char terminalX = 0;
-unsigned char terminalY = TERMINAL_HEIGHT-1;
+unsigned char terminalY = TERMINAL_HEIGHT - 1;
 bool terminalNeedsFlip = false;
 
-static void terminalControlCharsReset() {
-  terminalControlChars[0]=0;
-  terminalControlChars[1]=0;
-  terminalControlChars[2]=0;
-  terminalControlChars[3]=0;
+static void terminalControlCharsReset()
+{
+  terminalControlChars[0] = 0;
+  terminalControlChars[1] = 0;
+  terminalControlChars[2] = 0;
+  terminalControlChars[3] = 0;
 }
 
 // Try and find something to use for Graphics - MUST call terminalSetGFX after if this returns true
-bool terminalGetGFX(JsGraphics *gfx) {
+bool terminalGetGFX(JsGraphics *gfx)
+{
 #ifdef ESPR_GRAPHICS_INTERNAL
   // FIXME: not ideal, we should really be using the pointer directly
-  if (!graphicsInternal.setPixel) return false; // not set up yet
+  if (!graphicsInternal.setPixel)
+    return false; // not set up yet
   *gfx = graphicsInternal;
   return true;
 #else
   JsVar *v = jswrap_graphics_getInstance();
-  if (!v) return false;
+  if (!v)
+    return false;
   if (graphicsGetFromVar(gfx, v))
     return true;
   jsvUnLock(v);
@@ -84,7 +90,8 @@ bool terminalGetGFX(JsGraphics *gfx) {
 }
 
 /// Setup the graphics var state and flip the screen
-void terminalSetGFX(JsGraphics *gfx) {
+void terminalSetGFX(JsGraphics *gfx)
+{
 #ifdef ESPR_GRAPHICS_INTERNAL
   graphicsInternal = *gfx;
 #else
@@ -95,10 +102,12 @@ void terminalSetGFX(JsGraphics *gfx) {
 }
 
 /// Scroll up to leave one more line free at the bottom
-void terminalScroll() {
+void terminalScroll()
+{
   terminalY--;
   JsGraphics gfx;
-  if (terminalGetGFX(&gfx)) {
+  if (terminalGetGFX(&gfx))
+  {
     unsigned int cb = gfx.data.bgColor;
 #ifdef GRAPHICS_THEME
     gfx.data.bgColor = graphicsTheme.bg;
@@ -115,25 +124,41 @@ void terminalScroll() {
 }
 
 /// Handle data sent to the VT100 terminal
-void terminalSendChar(char chn) {
-  if (terminalControlChars[0] == 0) {
-    if (chn==8) {
-      if (terminalX>0) terminalX--;
-    } else if (chn==10) { // line feed
-      terminalX = 0; terminalY++;
+void terminalSendChar(char chn)
+{
+  if (terminalControlChars[0] == 0)
+  {
+    if (chn == 8)
+    {
+      if (terminalX > 0)
+        terminalX--;
+    }
+    else if (chn == 10)
+    { // line feed
+      terminalX = 0;
+      terminalY++;
       while (terminalY >= TERMINAL_HEIGHT)
         terminalScroll();
-    } else if (chn==13) { // carriage return
+    }
+    else if (chn == 13)
+    { // carriage return
       terminalX = 0;
-    } else if (chn==27) {
+    }
+    else if (chn == 27)
+    {
       terminalControlChars[0] = 27;
-    } else if (chn==19 || chn==17) { // XOFF/XON
-    } else {
+    }
+    else if (chn == 19 || chn == 17)
+    { // XOFF/XON
+    }
+    else
+    {
       // Else actually add character
       JsGraphics gfx;
-      if (terminalGetGFX(&gfx)) {
-        short cx = (short)(TERMINAL_OFFSET_X + terminalX*TERMINAL_CHAR_W);
-        short cy = (short)(TERMINAL_OFFSET_Y + terminalY*TERMINAL_CHAR_H + gfx.data.height - LCD_HEIGHT);
+      if (terminalGetGFX(&gfx))
+      {
+        short cx = (short)(TERMINAL_OFFSET_X + terminalX * TERMINAL_CHAR_W);
+        short cy = (short)(TERMINAL_OFFSET_Y + terminalY * TERMINAL_CHAR_H + gfx.data.height - LCD_HEIGHT);
         // draw char
         unsigned int cf = gfx.data.fgColor, cb = gfx.data.bgColor;
 #ifdef GRAPHICS_THEME
@@ -143,57 +168,99 @@ void terminalSendChar(char chn) {
         gfx.data.fgColor = -1; // always white on black
         gfx.data.bgColor = 0;
 #endif
-        TERMINAL_CHAR_CMD(&gfx, cx, cy, chn, 1, 1, true/*solid background - so no need to clear*/);
+        TERMINAL_CHAR_CMD(&gfx, cx, cy, chn, 1, 1, true /*solid background - so no need to clear*/);
         gfx.data.fgColor = cf;
         gfx.data.bgColor = cb;
         terminalSetGFX(&gfx);
       }
-      if (terminalX<255) terminalX++;
+      if (terminalX < 255)
+        terminalX++;
     }
-  } else if (terminalControlChars[0]==27) {
-    if (terminalControlChars[1]==91) {
-      if (terminalControlChars[2]==63) {
-        if (terminalControlChars[3]==55) {
+  }
+  else if (terminalControlChars[0] == 27)
+  {
+    if (terminalControlChars[1] == 91)
+    {
+      if (terminalControlChars[2] == 63)
+      {
+        if (terminalControlChars[3] == 55)
+        {
           // if (chn!=108) jsiConsolePrintf("Expected 27, 91, 63, 55, 108 - no line overflow sequence\n");
           terminalControlCharsReset();
-        } else {
-          if (chn==55) {
-            terminalControlChars[3] = 55;
-          } else terminalControlCharsReset();
         }
-      } else {
-        if (chn == 63) {
+        else
+        {
+          if (chn == 55)
+          {
+            terminalControlChars[3] = 55;
+          }
+          else
+            terminalControlCharsReset();
+        }
+      }
+      else
+      {
+        if (chn == 63)
+        {
           terminalControlChars[2] = 63;
-        } else {
+        }
+        else
+        {
           terminalControlCharsReset();
-          switch (chn) {
-            case 65: if (terminalY > 0) terminalY--; break;
-            case 66: terminalY++; while (terminalY >= TERMINAL_HEIGHT) terminalScroll(); break;  // down
-            case 67: if (terminalX<255) terminalX++; break; // right
-            case 68: if (terminalX > 0) terminalX--; break; // left
-            case 74: { // delete all to right and down
-              JsGraphics gfx;
-              if (terminalGetGFX(&gfx)) {
-                short cx = (short)(TERMINAL_OFFSET_X + terminalX*TERMINAL_CHAR_W);
-                short cy = (short)(TERMINAL_OFFSET_Y + terminalY*TERMINAL_CHAR_H + gfx.data.height - LCD_HEIGHT);
-                short w = (gfx.data.flags & JSGRAPHICSFLAGS_SWAP_XY) ? gfx.data.height : gfx.data.width;
-                short h = (gfx.data.flags & JSGRAPHICSFLAGS_SWAP_XY) ? gfx.data.width : gfx.data.height;
-                // Clear to right and down
-                graphicsFillRect(&gfx, cx, cy, w-1, cy+TERMINAL_CHAR_H-1, 0/*black*/); // current line
-                graphicsFillRect(&gfx, TERMINAL_OFFSET_X, cy+TERMINAL_CHAR_H, w-1, h-1, 0/*black*/); // everything under
-                terminalSetGFX(&gfx);
-              }
-            } break;
+          switch (chn)
+          {
+          case 65:
+            if (terminalY > 0)
+              terminalY--;
+            break;
+          case 66:
+            terminalY++;
+            while (terminalY >= TERMINAL_HEIGHT)
+              terminalScroll();
+            break; // down
+          case 67:
+            if (terminalX < 255)
+              terminalX++;
+            break; // right
+          case 68:
+            if (terminalX > 0)
+              terminalX--;
+            break; // left
+          case 74:
+          { // delete all to right and down
+            JsGraphics gfx;
+            if (terminalGetGFX(&gfx))
+            {
+              short cx = (short)(TERMINAL_OFFSET_X + terminalX * TERMINAL_CHAR_W);
+              short cy = (short)(TERMINAL_OFFSET_Y + terminalY * TERMINAL_CHAR_H + gfx.data.height - LCD_HEIGHT);
+              short w = (gfx.data.flags & JSGRAPHICSFLAGS_SWAP_XY) ? gfx.data.height : gfx.data.width;
+              short h = (gfx.data.flags & JSGRAPHICSFLAGS_SWAP_XY) ? gfx.data.width : gfx.data.height;
+              // Clear to right and down
+              graphicsFillRect(&gfx, cx, cy, w - 1, cy + TERMINAL_CHAR_H - 1, 0 /*black*/);               // current line
+              graphicsFillRect(&gfx, TERMINAL_OFFSET_X, cy + TERMINAL_CHAR_H, w - 1, h - 1, 0 /*black*/); // everything under
+              terminalSetGFX(&gfx);
+            }
+          }
+          break;
           }
         }
       }
-    } else {
-      switch (chn) {
-        case 91: terminalControlChars[1] = 91; break;
-        default: terminalControlCharsReset(); break;
+    }
+    else
+    {
+      switch (chn)
+      {
+      case 91:
+        terminalControlChars[1] = 91;
+        break;
+      default:
+        terminalControlCharsReset();
+        break;
       }
     }
-  } else {
+  }
+  else
+  {
     terminalControlCharsReset();
   }
 }
@@ -202,25 +269,30 @@ void terminalSendChar(char chn) {
   "type" : "init",
   "generate" : "jswrap_terminal_init"
 }*/
-void jswrap_terminal_init() {
+void jswrap_terminal_init()
+{
   terminalControlCharsReset();
   terminalX = 0;
-  terminalY = (unsigned char)(TERMINAL_HEIGHT-1);
+  terminalY = (unsigned char)(TERMINAL_HEIGHT - 1);
 }
 
 /*JSON{
   "type" : "idle",
   "generate" : "jswrap_terminal_idle"
 }*/
-bool jswrap_terminal_idle() {
-  if (terminalNeedsFlip) {
+bool jswrap_terminal_idle()
+{
+  if (terminalNeedsFlip)
+  {
 #ifdef ESPR_GRAPHICS_INTERNAL
     graphicsInternalFlip();
 #else
     JsGraphics gfx;
-    if (terminalGetGFX(&gfx)) {
+    if (terminalGetGFX(&gfx))
+    {
       JsVar *flip = jsvObjectGetChildIfExists(gfx.graphicsVar, "flip");
-      if (flip) jsvUnLock2(jspExecuteFunction(flip,gfx.graphicsVar,0,0),flip);
+      if (flip)
+        jsvUnLock2(jspExecuteFunction(flip, gfx.graphicsVar, 0, 0), flip);
       jsvUnLock(gfx.graphicsVar);
       terminalNeedsFlip = false;
     }
@@ -228,5 +300,3 @@ bool jswrap_terminal_idle() {
   }
   return false;
 }
-
-

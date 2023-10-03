@@ -14,6 +14,7 @@
 #ifndef GAP_FUNC_H_
 #define GAP_FUNC_H_
 
+#include "DeviceConfig.h"
 #include "esp_gap_ble_api.h"
 #include "jsvar.h"
 #include "bluetooth.h"

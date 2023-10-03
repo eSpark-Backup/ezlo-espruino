@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 
+#include "DeviceConfig.h"
 #include "esp_system.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"

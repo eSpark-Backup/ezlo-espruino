@@ -25,12 +25,12 @@
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "tcpip_adapter.h"
-#include "mdns/include/mdns.h"
+#include "mdns.h"
 
-#include "lwip/include/apps/ping/ping.h"
-#include "lwip/include/apps/esp_ping.h"
-#include "apps/sntp/sntp.h"
-#include "lwip/dns.h"
+#include "ping.h"
+#include "esp_ping.h"
+#include "sntp.h"
+#include "dns.h"
 
 #include "jsinteractive.h"
 #include "network.h"

@@ -17,26 +17,27 @@
 #include "jsvar.h"
 
 #include "esp_bt_defs.h"
+#include "DeviceConfig.h"
 #include "esp_gatts_api.h"
 #include "esp_gattc_api.h"
 #include "esp_gap_ble_api.h"
 
 #include "bluetooth.h"
 
-#define BLE_READ_EVENT        JS_EVENT_PREFIX"blerv"
-#define BLE_CONNECT_EVENT      JS_EVENT_PREFIX"connect"
-#define BLE_DISCONNECT_EVENT    JS_EVENT_PREFIX"disconnect"
+#define BLE_READ_EVENT JS_EVENT_PREFIX "blerv"
+#define BLE_CONNECT_EVENT JS_EVENT_PREFIX "connect"
+#define BLE_DISCONNECT_EVENT JS_EVENT_PREFIX "disconnect"
 
-#define BLE_CHAR_VALUE      "BLE_CHAR_V"
+#define BLE_CHAR_VALUE "BLE_CHAR_V"
 
-typedef enum{
+typedef enum
+{
   ESP_BLE_DEBUG_GAP = 1,
   ESP_BLE_DEBUG_GATTS = 2,
   ESP_BLE_DEBUG_GATTC = 4
 } esp_ble_debug_t;
 
 extern esp_ble_debug_t bleEventDebug;
-
 
 esp_err_t initController();
 esp_err_t initBluedroid();
@@ -45,15 +46,14 @@ esp_err_t deinitBluedroid();
 esp_err_t registerCallbacks();
 esp_err_t setMtu();
 
-
 void ESP32_setBLE_Debug(int level);
-void jsWarnGattsEvent(esp_gatts_cb_event_t event,esp_gatt_if_t gatts_if);
-void jsWarnGattcEvent(esp_gattc_cb_event_t event,esp_gatt_if_t gatts_if);
+void jsWarnGattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if);
+void jsWarnGattcEvent(esp_gattc_cb_event_t event, esp_gatt_if_t gatts_if);
 void jsWarnGapEvent(esp_gap_ble_cb_event_t event);
 
 void jsWarnBDA(uint8_t *bda);
 void jsWarnUUID(esp_bt_uuid_t char_uuid);
-void jsWarnHeap(char * whereAmI);
+void jsWarnHeap(char *whereAmI);
 
 void bleGetHiddenName(char *eventName, char *hiddenName, uint16_t pos);
 void bleRemoveChilds(JsVar *parent);
