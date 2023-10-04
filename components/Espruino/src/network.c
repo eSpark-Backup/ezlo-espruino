@@ -35,8 +35,8 @@
   #include "network_linux.h"
 #endif
 #if defined(USE_TLS)
-  #include "mbedtls/ssl.h"
-  #include "mbedtls/ctr_drbg.h"
+  #include "ssl.h"
+  #include "ctr_drbg.h"
   #include "jswrap_crypto.h"
 #endif
 #if defined(USE_NETWORK_JS)

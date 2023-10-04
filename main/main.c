@@ -3,7 +3,7 @@
 
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "mbedtls/config.h"
+#include "config.h"
 #include "driver/gpio.h"
 #include "nvs_storage.h"
 #include "esp_system.h"

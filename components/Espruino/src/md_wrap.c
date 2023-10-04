@@ -34,19 +34,19 @@
 #include "md_internal.h"
 
 #if defined(MBEDTLS_MD2_C)
-#include "mbedtls/md2.h"
+#include "md2.h"
 #endif
 
 #if defined(MBEDTLS_MD4_C)
-#include "mbedtls/md4.h"
+#include "md4.h"
 #endif
 
 #if defined(MBEDTLS_MD5_C)
-#include "mbedtls/md5.h"
+#include "md5.h"
 #endif
 
 #if defined(MBEDTLS_RIPEMD160_C)
-#include "mbedtls/ripemd160.h"
+#include "ripemd160.h"
 #endif
 
 #if defined(MBEDTLS_SHA1_C)
@@ -54,11 +54,11 @@
 #endif
 
 #if defined(MBEDTLS_SHA256_C)
-#include "mbedtls/sha256.h"
+#include "sha256.h"
 #endif
 
 #if defined(MBEDTLS_SHA512_C)
-#include "mbedtls/sha512.h"
+#include "sha512.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)

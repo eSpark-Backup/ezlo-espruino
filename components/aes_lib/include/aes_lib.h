@@ -1,7 +1,7 @@
 #ifndef __AES_LIB_H__
 #define __AES_LIB_H__
 
-#include "mbedtls/aes.h"
+#include "aes.h"
 #include "cstring"
 #include "debug.h"
 #include "string"
