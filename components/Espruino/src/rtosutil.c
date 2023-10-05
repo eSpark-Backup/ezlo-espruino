@@ -181,7 +181,7 @@ void task_list()
   {
     if (RTOStasks[i].name == NULL)
       return;
-    printf("task %s : %d\n", RTOStasks[i].name, RTOStasks[i].handle);
+    printf("task %s : %d\n", RTOStasks[i].name, (uint8_t)RTOStasks[i].handle);
   }
 }
 void task_Suspend(int idx)

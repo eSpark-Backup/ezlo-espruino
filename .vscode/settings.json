@@ -8,6 +8,8 @@
     "system_error": "c",
     "xtr1common": "c",
     "esp32_gap_func.h": "c",
-    "sha1.h": "c"
+    "sha1.h": "c",
+    "string.h": "c",
+    "stdio.h": "c"
   }
 }

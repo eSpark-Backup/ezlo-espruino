@@ -42,9 +42,9 @@
 #include "jswrapper.h"
 
 #ifdef BLUETOOTH
-#include "libs/bluetooth/bluetooth.h"
-#include "BLE/esp32_gap_func.h"
-#include "BLE/esp32_gatts_func.h"
+#include "bluetooth.h"
+#include "esp32_gap_func.h"
+#include "esp32_gatts_func.h"
 #endif
 
 #include "esp_spi_flash.h"
@@ -207,7 +207,7 @@ void app_main(void)
     task_init(espruinoTask, "EspruinoTask", ESP_STACK_SIZE, 5, 0);
     task_init(uartTask, "ConsoleTask", 2200, 20, 0);
 #else
-    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", ESP_STACK_SIZE, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", 2500, NULL, 5, NULL, 0);
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, NULL, 0);
 #endif
 

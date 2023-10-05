@@ -27,10 +27,10 @@
 #include "tcpip_adapter.h"
 #include "mdns.h"
 
-#include "ping.h"
+#include "ping/ping.h"
 #include "esp_ping.h"
 #include "sntp.h"
-#include "dns.h"
+#include "lwip/dns.h"
 
 #include "jsinteractive.h"
 #include "network.h"
@@ -120,6 +120,16 @@ static char *authModeToString(wifi_auth_mode_t authMode)
     return "wpa2";
   case WIFI_AUTH_WPA_WPA2_PSK:
     return "wpa_wpa2";
+  case WIFI_AUTH_WPA2_ENTERPRISE:
+    return "WPA2_ENTERPRISE";
+  case WIFI_AUTH_WPA3_PSK:
+    return "WPA3_PSK";
+  case WIFI_AUTH_WPA2_WPA3_PSK:
+    return "WPA2_WPA3_PSK";
+  case WIFI_AUTH_WAPI_PSK:
+    return "WAPI_PSK";
+  case WIFI_AUTH_MAX:
+    return "AUTH_MAX";
   }
   return "unknown";
 } // End of authModeToString
@@ -252,6 +262,8 @@ static char *wifiModeToString(wifi_mode_t mode)
     return "AP";
   case WIFI_MODE_APSTA:
     return "APSTA";
+  case WIFI_MODE_MAX:
+    return "MODE_MAX";
   }
   return "UNKNOWN";
 } // End of wifiModeToString
@@ -400,7 +412,7 @@ static void scanCB()
 
       // The SSID may **NOT** be NULL terminated ... so handle that.
       char temp[32 + 1];
-      strncpy((char *)temp, list[i].ssid, 32);
+      strncpy((char *)temp, (char *)list[i].ssid, 32);
       temp[32] = '\0';
       jsvObjectSetChildAndUnLock(jsCurrentAccessPoint, "ssid", jsvNewFromString(temp));
       sprintf(temp, MACSTR, MAC2STR(list[i].bssid));
@@ -665,7 +677,12 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     // 12345678901234567_8
     // xx:xx:xx:xx:xx:xx\0
     char temp[18];
-    sprintf(temp, MACSTR, MAC2STR(&event->event_info.sta_connected.mac));
+    sprintf(temp, MACSTR, (unsigned int)event->event_info.sta_connected.mac[0],
+            (unsigned int)event->event_info.sta_connected.mac[1],
+            (unsigned int)event->event_info.sta_connected.mac[2],
+            (unsigned int)event->event_info.sta_connected.mac[3],
+            (unsigned int)event->event_info.sta_connected.mac[4],
+            (unsigned int)event->event_info.sta_connected.mac[5]); // MAC2STR(&event->event_info.sta_connected.mac));
     jsvObjectSetChildAndUnLock(jsDetails, "mac", jsvNewFromString(temp));
     sendWifiEvent(event->event_id, jsDetails);
     return ESP_OK;
@@ -683,7 +700,12 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     // 12345678901234567_8
     // xx:xx:xx:xx:xx:xx\0
     char temp[18];
-    sprintf(temp, MACSTR, MAC2STR(&event->event_info.sta_disconnected.mac));
+    sprintf(temp, MACSTR, (unsigned int)event->event_info.sta_disconnected.mac[0],
+            (unsigned int)event->event_info.sta_disconnected.mac[1],
+            (unsigned int)event->event_info.sta_disconnected.mac[2],
+            (unsigned int)event->event_info.sta_disconnected.mac[3],
+            (unsigned int)event->event_info.sta_disconnected.mac[4],
+            (unsigned int)event->event_info.sta_disconnected.mac[5]); // MAC2STR(&event->event_info.sta_disconnected.mac));
     jsvObjectSetChildAndUnLock(jsDetails, "mac", jsvNewFromString(temp));
     sendWifiEvent(event->event_id, jsDetails);
     return ESP_OK;
@@ -799,7 +821,7 @@ void jswrap_wifi_disconnect(JsVar *jsCallback)
   // Call the ESP-IDF to disconnect us from the access point.
   jsDebug(DBG_INFO, "Disconnecting.....");
   // turn off auto-connect
-  esp_wifi_set_auto_connect(false);
+  // esp_wifi_set_auto_connect(false);
   s_retry_num = 0; // flag so we don't attempt to reconnect
   esp_wifi_disconnect();
 } // End of jswrap_wifi_disconnect
@@ -951,7 +973,7 @@ void jswrap_wifi_connect(
   memcpy(staConfig.sta.ssid, ssid, sizeof(staConfig.sta.ssid));
   memcpy(staConfig.sta.password, password, sizeof(staConfig.sta.password));
   staConfig.sta.bssid_set = false;
-  esp_wifi_set_auto_connect(true);
+  // esp_wifi_set_auto_connect(true);
   jsDebug(DBG_INFO, "jswrap_wifi_connect: esp_wifi_set_autoconnect done");
 
   err = esp_wifi_set_config(ESP_IF_WIFI_STA, &staConfig);
@@ -1098,7 +1120,7 @@ void jswrap_wifi_startAP(
   apConfig.max_connection = 4;
   apConfig.ssid_len = (uint8_t)jsvGetString(jsSsid, (char *)apConfig.ssid, sizeof(apConfig.ssid));
   apConfig.authmode = WIFI_AUTH_OPEN;
-  strcpy(apConfig.password, "");
+  memcpy(apConfig.password, "", 0);
 
   if (jsvIsObject(jsOptions))
   {
@@ -1158,7 +1180,7 @@ void jswrap_wifi_startAP(
     else
     {
       // no explicit auth mode, set according to presence of password
-      if (strlen(apConfig.password) == 0)
+      if (strlen((char *)apConfig.password) == 0)
       {
         apConfig.authmode = WIFI_AUTH_OPEN;
       }
@@ -1171,14 +1193,14 @@ void jswrap_wifi_startAP(
     jsvUnLock(jsAuth);
 
     // Make sure password and authMode match
-    if (apConfig.authmode != WIFI_AUTH_OPEN && strlen(apConfig.password) == 0)
+    if (apConfig.authmode != WIFI_AUTH_OPEN && strlen((char *)apConfig.password) == 0)
     {
       jsExceptionHere(JSET_ERROR, "Password not set but authMode not open.");
       return;
     }
 
     // Make sure that if authmode is explicitly open then there is NO password supplied.
-    if (apConfig.authmode == WIFI_AUTH_OPEN && strlen(apConfig.password) > 0)
+    if (apConfig.authmode == WIFI_AUTH_OPEN && strlen((char *)apConfig.password) > 0)
     {
       jsExceptionHere(JSET_ERROR, "Auth mode set to open but password supplied.");
       return;
@@ -1244,8 +1266,11 @@ JsVar *jswrap_wifi_getStatus(JsVar *jsCallback)
   char *psTypeStr;
   switch (psType)
   {
-  case WIFI_PS_MODEM:
-    psTypeStr = "modem";
+  case WIFI_PS_MIN_MODEM:
+    psTypeStr = "Min modem";
+    break;
+  case WIFI_PS_MAX_MODEM:
+    psTypeStr = "Max modem";
     break;
   case WIFI_PS_NONE:
     psTypeStr = "none";
@@ -1267,7 +1292,7 @@ JsVar *jswrap_wifi_getStatus(JsVar *jsCallback)
       char buf[35];
 
       // SSID of AP
-      strncpy(buf, ap_info.ssid, sizeof(buf));
+      strncpy(buf, (char *)ap_info.ssid, sizeof(buf));
       buf[34] = 0;
       jsvObjectSetChildAndUnLock(jsWiFiStatus, "ssid", jsvNewFromString(buf));
 
@@ -1356,10 +1381,6 @@ void jswrap_wifi_setConfig(JsVar *jsSettings)
     if (jsvIsStringEqual(jsPowerSave, "none"))
     {
       esp_wifi_set_ps(WIFI_PS_NONE);
-    }
-    else if (jsvIsStringEqual(jsPowerSave, "ps-poll"))
-    {
-      esp_wifi_set_ps(WIFI_PS_MODEM);
     }
     else if (jsvIsStringEqual(jsPowerSave, "min"))
     {
