@@ -16,13 +16,13 @@
 #include "jswrap_file.h"
 #include "jsparse.h"
 #include "jsflags.h"
+#include "DeviceConfig.h"
 
-#define JS_FS_DATA_NAME JS_HIDDEN_CHAR_STR"FSd" // the data in each file
-#define JS_FS_OPEN_FILES_NAME "FSopen" // the list of open files
+#define JS_FS_DATA_NAME JS_HIDDEN_CHAR_STR "FSd" // the data in each file
+#define JS_FS_OPEN_FILES_NAME "FSopen"           // the list of open files
 #if !defined(LINUX) && !defined(USE_FILESYSTEM_SDIO) && !defined(USE_FLASHFS)
 #define SD_CARD_ANYWHERE
 #endif
-
 
 #ifndef LINUX
 FATFS jsfsFAT;
@@ -39,44 +39,66 @@ bool isSdSPISetup();
 #endif
 
 // 'path' must be of JS_DIR_BUF_SIZE
-bool jsfsGetPathString(char *pathStr, JsVar *path) {
-  if (jsvGetString(path, pathStr, JS_DIR_BUF_SIZE)==JS_DIR_BUF_SIZE) {
+bool jsfsGetPathString(char *pathStr, JsVar *path)
+{
+  if (jsvGetString(path, pathStr, JS_DIR_BUF_SIZE) == JS_DIR_BUF_SIZE)
+  {
     jsExceptionHere(JSET_ERROR, "File path too long\n");
     return false;
   }
   return true;
 }
 
-void jsfsReportError(const char *msg, FRESULT res) {
+void jsfsReportError(const char *msg, FRESULT res)
+{
   const char *errStr = "UNKNOWN";
-  if (res==FR_OK             ) errStr = "OK";
+  if (res == FR_OK)
+    errStr = "OK";
 #ifndef LINUX
-  else if (res==FR_DISK_ERR       ) errStr = "DISK_ERR";
-  else if (res==FR_INT_ERR        ) errStr = "INT_ERR";
-  else if (res==FR_NOT_READY      ) errStr = "NOT_READY";
-  else if (res==FR_NO_FILE        ) errStr = "NO_FILE";
-  else if (res==FR_NO_PATH        ) errStr = "NO_PATH";
-  else if (res==FR_INVALID_NAME   ) errStr = "INVALID_NAME";
-  else if (res==FR_DENIED         ) errStr = "DENIED";
-  else if (res==FR_EXIST          ) errStr = "EXIST";
-  else if (res==FR_INVALID_OBJECT ) errStr = "INVALID_OBJECT";
-  else if (res==FR_WRITE_PROTECTED) errStr = "WRITE_PROTECTED";
-  else if (res==FR_INVALID_DRIVE  ) errStr = "INVALID_DRIVE";
-  else if (res==FR_NOT_ENABLED    ) errStr = "NOT_ENABLED";
-  else if (res==FR_NO_FILESYSTEM  ) errStr = "NO_FILESYSTEM";
-  else if (res==FR_MKFS_ABORTED   ) errStr = "MKFS_ABORTED";
-  else if (res==FR_TIMEOUT        ) errStr = "TIMEOUT";
+  else if (res == FR_DISK_ERR)
+    errStr = "DISK_ERR";
+  else if (res == FR_INT_ERR)
+    errStr = "INT_ERR";
+  else if (res == FR_NOT_READY)
+    errStr = "NOT_READY";
+  else if (res == FR_NO_FILE)
+    errStr = "NO_FILE";
+  else if (res == FR_NO_PATH)
+    errStr = "NO_PATH";
+  else if (res == FR_INVALID_NAME)
+    errStr = "INVALID_NAME";
+  else if (res == FR_DENIED)
+    errStr = "DENIED";
+  else if (res == FR_EXIST)
+    errStr = "EXIST";
+  else if (res == FR_INVALID_OBJECT)
+    errStr = "INVALID_OBJECT";
+  else if (res == FR_WRITE_PROTECTED)
+    errStr = "WRITE_PROTECTED";
+  else if (res == FR_INVALID_DRIVE)
+    errStr = "INVALID_DRIVE";
+  else if (res == FR_NOT_ENABLED)
+    errStr = "NOT_ENABLED";
+  else if (res == FR_NO_FILESYSTEM)
+    errStr = "NO_FILESYSTEM";
+  else if (res == FR_MKFS_ABORTED)
+    errStr = "MKFS_ABORTED";
+  else if (res == FR_TIMEOUT)
+    errStr = "TIMEOUT";
 #endif
-  jsExceptionHere(JSET_ERROR,"%s : %s", msg, errStr);
+  jsExceptionHere(JSET_ERROR, "%s : %s", msg, errStr);
 }
 
-bool jsfsInit() {
-   
+bool jsfsInit()
+{
+
 #ifndef LINUX
-  if (!fat_initialised) {
-#ifndef USE_FLASHFS  
+  if (!fat_initialised)
+  {
+#ifndef USE_FLASHFS
 #ifdef SD_CARD_ANYWHERE
-    if (!isSdSPISetup()) {
+    if (!isSdSPISetup())
+    {
 #ifdef SD_SPI
       const char *deviceStr = jshGetDeviceString(SD_SPI);
       JsVar *spi = jsvSkipNameAndUnLock(jspGetNamedVariable(deviceStr));
@@ -90,17 +112,18 @@ bool jsfsInit() {
       sdSPISetup(spi, SD_CS_PIN);
       jsvUnLock(spi);
 #else
-      jsExceptionHere(JSET_ERROR,"SD card must be setup with E.connectSDCard first");
+      jsExceptionHere(JSET_ERROR, "SD card must be setup with E.connectSDCard first");
       return false;
 #endif // SD_SPI
     }
 #endif // SD_CARD_ANYWHER
-#endif // USE_FLASHFS 
+#endif // USE_FLASHFS
     FRESULT res;
 
-    if ((res = f_mount(&jsfsFAT, "", 1)) != FR_OK) {
-       jsfsReportError("Unable to mount media", res);
-       return false;
+    if ((res = f_mount(&jsfsFAT, "", 1)) != FR_OK)
+    {
+      jsfsReportError("Unable to mount media", res);
+      return false;
     }
     fat_initialised = true;
   }
@@ -144,13 +167,16 @@ initialised, and some cards will not work reliably without one.
 **Note:** If you want to remove an SD card after you have started using it, you
 *must* call `E.unmountSD()` or you may cause damage to the card.
 */
-void jswrap_E_connectSDCard(JsVar *spi, Pin csPin) {
+void jswrap_E_connectSDCard(JsVar *spi, Pin csPin)
+{
 #ifdef SD_CARD_ANYWHERE
-  if (!jsvIsObject(spi)) {
+  if (!jsvIsObject(spi))
+  {
     jsExceptionHere(JSET_ERROR, "First argument is a %t, not an SPI object\n", spi);
     return;
   }
-  if (!jshIsPinValid(csPin)) {
+  if (!jshIsPinValid(csPin))
+  {
     jsExceptionHere(JSET_ERROR, "Second argument is not a valid pin");
     return;
   }
@@ -179,17 +205,21 @@ information.
 *must* call `E.unmountSD()` or you may cause damage to the card.
 */
 
-static JsVar* fsGetArray(bool create) {
+static JsVar *fsGetArray(bool create)
+{
   return jsvObjectGetChild(execInfo.hiddenRoot, JS_FS_OPEN_FILES_NAME, create ? JSV_ARRAY : 0);
 }
 
-static bool fileGetFromVar(JsFile *file, JsVar *parent) {
+static bool fileGetFromVar(JsFile *file, JsVar *parent)
+{
   bool ret = false;
   JsVar *fHandle = jsvObjectGetChildIfExists(parent, JS_FS_DATA_NAME);
-  if (fHandle && jsvIsFlatString(fHandle)) {
-    file->data = (JsFileData*)jsvGetFlatStringPointer(fHandle);
+  if (fHandle && jsvIsFlatString(fHandle))
+  {
+    file->data = (JsFileData *)jsvGetFlatStringPointer(fHandle);
     file->fileVar = parent;
-    if(file->data->state == FS_OPEN) {// return false if the file has been closed.
+    if (file->data->state == FS_OPEN)
+    { // return false if the file has been closed.
       ret = true;
     }
   }
@@ -201,12 +231,15 @@ static bool fileGetFromVar(JsFile *file, JsVar *parent) {
   "type" : "kill",
   "generate" : "jswrap_file_kill"
 }*/
-void jswrap_file_kill() {
+void jswrap_file_kill()
+{
   JsVar *arr = fsGetArray(false);
-  if (arr) {
+  if (arr)
+  {
     JsvObjectIterator it;
     jsvObjectIteratorNew(&it, arr);
-    while (jsvObjectIteratorHasValue(&it)) {
+    while (jsvObjectIteratorHasValue(&it))
+    {
       JsVar *file = jsvObjectIteratorGetValue(&it);
       jswrap_file_close(file);
       jsvUnLock(file);
@@ -218,7 +251,8 @@ void jswrap_file_kill() {
   }
   // close fs library
 #ifndef LINUX
-  if (fat_initialised) {
+  if (fat_initialised)
+  {
     fat_initialised = false;
     f_mount(0, 0, 0);
   }
@@ -238,21 +272,25 @@ Unmount the SD card, so it can be removed. If you remove the SD card without
 calling this you may cause corruption, and you will be unable to access another
 SD card until you reset Espruino or call `E.unmountSD()`.
 */
-void jswrap_E_unmountSD() {
+void jswrap_E_unmountSD()
+{
   jswrap_file_kill();
 }
 
-static bool allocateJsFile(JsFile* file,FileMode mode, FileType type) {
+static bool allocateJsFile(JsFile *file, FileMode mode, FileType type)
+{
   JsVar *parent = jspNewObject(0, "File");
-  if (!parent) return false; // low memory
+  if (!parent)
+    return false; // low memory
 
   JsVar *data = jsvNewFlatStringOfLength(sizeof(JsFileData));
-  if (!data) { // out of memory for flat string
+  if (!data)
+  {                                   // out of memory for flat string
     jsErrorFlags |= JSERR_LOW_MEMORY; // flag this up as an issue
     jsvUnLock(parent);
     return false;
   }
-  file->data = (JsFileData*)jsvGetFlatStringPointer(data);
+  file->data = (JsFileData *)jsvGetFlatStringPointer(data);
   jsvObjectSetChildAndUnLock(parent, JS_FS_DATA_NAME, data);
   file->fileVar = parent;
   assert(file->data);
@@ -276,20 +314,25 @@ static bool allocateJsFile(JsFile* file,FileMode mode, FileType type) {
 }
 Open a file
 */
-JsVar *jswrap_E_openFile(JsVar* path, JsVar* mode) {
+JsVar *jswrap_E_openFile(JsVar *path, JsVar *mode)
+{
   FRESULT res = FR_INVALID_NAME;
   JsFile file;
   file.data = 0;
   file.fileVar = 0;
   FileMode fMode = FM_NONE;
-  if (jsfsInit()) {
+  if (jsfsInit())
+  {
     JsVar *arr = fsGetArray(true);
-    if (!arr) return 0; // out of memory
+    if (!arr)
+      return 0; // out of memory
 
     char pathStr[JS_DIR_BUF_SIZE] = "";
     char modeStr[3] = "r";
-    if (!jsvIsUndefined(path)) {
-      if (!jsfsGetPathString(pathStr, path)) {
+    if (!jsvIsUndefined(path))
+    {
+      if (!jsfsGetPathString(pathStr, path))
+      {
         jsvUnLock(arr);
         return 0;
       }
@@ -302,57 +345,70 @@ JsVar *jswrap_E_openFile(JsVar* path, JsVar* mode) {
       bool append = false;
 #endif
 
-      if(strcmp(modeStr,"r") == 0) {
+      if (strcmp(modeStr, "r") == 0)
+      {
         fMode = FM_READ;
 #ifndef LINUX
         ff_mode = FA_READ | FA_OPEN_EXISTING;
 #endif
-      } else if(strcmp(modeStr,"a") == 0) {
+      }
+      else if (strcmp(modeStr, "a") == 0)
+      {
         fMode = FM_WRITE;
 #ifndef LINUX
         ff_mode = FA_WRITE | FA_OPEN_ALWAYS;
         append = true;
 #endif
-      } else if(strcmp(modeStr,"w") == 0) {
+      }
+      else if (strcmp(modeStr, "w") == 0)
+      {
         fMode = FM_WRITE;
 #ifndef LINUX
         ff_mode = FA_WRITE | FA_CREATE_ALWAYS;
 #endif
-      } else if(strcmp(modeStr,"w+") == 0) {
+      }
+      else if (strcmp(modeStr, "w+") == 0)
+      {
         fMode = FM_READ_WRITE;
 #ifndef LINUX
         ff_mode = FA_WRITE | FA_OPEN_ALWAYS;
 #endif
       }
-      if(fMode != FM_NONE && allocateJsFile(&file, fMode, FT_FILE)) {
+      if (fMode != FM_NONE && allocateJsFile(&file, fMode, FT_FILE))
+      {
 #ifndef LINUX
-        if ((res=f_open(&file.data->handle, pathStr, ff_mode)) == FR_OK) {
-          if (append) f_lseek(&file.data->handle, file.data->handle.fsize); // move to end of file
+        if ((res = f_open(&file.data->handle, pathStr, ff_mode)) == FR_OK)
+        {
+          if (append)
+            f_lseek(&file.data->handle, file.data->handle.fsize); // move to end of file
 #else
         file.data->handle = fopen(pathStr, modeStr);
-        if (file.data->handle) {
-          res=FR_OK;
+        if (file.data->handle)
+        {
+          res = FR_OK;
 #endif
           file.data->state = FS_OPEN;
           // add to list of open files
           jsvArrayPush(arr, file.fileVar);
-        } else {
+        }
+        else
+        {
           // File open failed
           jsvUnLock(file.fileVar);
           file.fileVar = 0;
         }
 
-        if(res != FR_OK)
+        if (res != FR_OK)
           jsfsReportError("Could not open file", res);
-
       }
-    } else {
-      jsExceptionHere(JSET_ERROR,"Path is undefined");
+    }
+    else
+    {
+      jsExceptionHere(JSET_ERROR, "Path is undefined");
     }
 
     jsvUnLock(arr);
   }
-
 
   return file.fileVar;
 }
@@ -365,10 +421,13 @@ JsVar *jswrap_E_openFile(JsVar* path, JsVar* mode) {
 }
 Close an open file.
 */
-void jswrap_file_close(JsVar* parent) {
-  if (jsfsInit()) {
+void jswrap_file_close(JsVar *parent)
+{
+  if (jsfsInit())
+  {
     JsFile file;
-    if (fileGetFromVar(&file, parent) && file.data->state == FS_OPEN) {
+    if (fileGetFromVar(&file, parent) && file.data->state == FS_OPEN)
+    {
 #ifndef LINUX
       f_close(&file.data->handle);
 #else
@@ -379,9 +438,11 @@ void jswrap_file_close(JsVar* parent) {
       // TODO: could try and free the memory used by file.data ?
 
       JsVar *arr = fsGetArray(false);
-      if (arr) {
+      if (arr)
+      {
         JsVar *idx = jsvGetIndexOf(arr, file.fileVar, true);
-        if (idx) {
+        if (idx)
+        {
           jsvRemoveChild(arr, idx);
           jsvUnLock(idx);
         }
@@ -409,22 +470,29 @@ disable this behaviour and really speed up writes - but then you must be sure to
 close all files you are writing before power is lost or you will cause damage to
 your SD card's filesystem.
 */
-size_t jswrap_file_write(JsVar* parent, JsVar* buffer) {
-  if (!buffer) return 0;
+size_t jswrap_file_write(JsVar *parent, JsVar *buffer)
+{
+  if (!buffer)
+    return 0;
   FRESULT res = 0;
   size_t bytesWritten = 0;
-  if (jsfsInit()) {
+  if (jsfsInit())
+  {
     JsFile file;
-    if (fileGetFromVar(&file, parent)) {
-      if(file.data->mode == FM_WRITE || file.data->mode == FM_READ_WRITE) {
+    if (fileGetFromVar(&file, parent))
+    {
+      if (file.data->mode == FM_WRITE || file.data->mode == FM_READ_WRITE)
+      {
         JsvIterator it;
         jsvIteratorNew(&it, buffer, JSIF_EVERY_ARRAY_ELEMENT);
         char buf[32];
 
-        while (jsvIteratorHasElement(&it)) {
+        while (jsvIteratorHasElement(&it))
+        {
           // pull in a buffer's worth of data
           size_t n = 0;
-          while (jsvIteratorHasElement(&it) && n<sizeof(buf)) {
+          while (jsvIteratorHasElement(&it) && n < sizeof(buf))
+          {
             buf[n++] = (char)jsvIteratorGetIntegerValue(&it);
             jsvIteratorNext(&it);
           }
@@ -436,13 +504,15 @@ size_t jswrap_file_write(JsVar* parent, JsVar* buffer) {
           written = fwrite(&buf, 1, n, file.data->handle);
 #endif
           bytesWritten += written;
-          if(written == 0)
+          if (written == 0)
             res = FR_DISK_ERR;
-          if (res) break;
+          if (res)
+            break;
         }
         jsvIteratorFree(&it);
         // finally, sync - just in case there's a reset or something
-        if (!jsfGetFlag(JSF_UNSYNC_FILES)) {
+        if (!jsfGetFlag(JSF_UNSYNC_FILES))
+        {
 #ifndef LINUX
           f_sync(&file.data->handle);
 #else
@@ -453,7 +523,8 @@ size_t jswrap_file_write(JsVar* parent, JsVar* buffer) {
     }
   }
 
-  if (res) {
+  if (res)
+  {
     jsfsReportError("Unable to write file", res);
   }
   return bytesWritten;
@@ -471,61 +542,77 @@ size_t jswrap_file_write(JsVar* parent, JsVar* buffer) {
 }
 Read data in a file in byte size chunks
 */
-JsVar *jswrap_file_read(JsVar* parent, int length) {
-  if (length<0) length=0;
+JsVar *jswrap_file_read(JsVar *parent, int length)
+{
+  if (length < 0)
+    length = 0;
   JsVar *buffer = 0;
   JsvStringIterator it;
   FRESULT res = 0;
   size_t bytesRead = 0;
-  if (jsfsInit()) {
+  if (jsfsInit())
+  {
     JsFile file;
-    if (fileGetFromVar(&file, parent)) {
-      if(file.data->mode == FM_READ || file.data->mode == FM_READ_WRITE) {
+    if (fileGetFromVar(&file, parent))
+    {
+      if (file.data->mode == FM_READ || file.data->mode == FM_READ_WRITE)
+      {
         size_t actual = 0;
 #ifndef LINUX
         // if we're able to load this into a flat string, do it!
-        size_t len = f_size(&file.data->handle)-f_tell(&file.data->handle);
-        if ( len == 0 ) { // file all read
+        size_t len = f_size(&file.data->handle) - f_tell(&file.data->handle);
+        if (len == 0)
+        {           // file all read
           return 0; // if called from a pipe signal end callback
         }
-        if (len > (size_t)length) len = (size_t)length;
+        if (len > (size_t)length)
+          len = (size_t)length;
         buffer = jsvNewFlatStringOfLength(len);
-        if (buffer) {
+        if (buffer)
+        {
           res = f_read(&file.data->handle, jsvGetFlatStringPointer(buffer), len, &actual);
-          if (res) jsfsReportError("Unable to read file", res);
+          if (res)
+            jsfsReportError("Unable to read file", res);
           return buffer;
         }
 #endif
         char buf[32];
 
-        while (bytesRead < (size_t)length) {
+        while (bytesRead < (size_t)length)
+        {
           size_t requested = (size_t)length - bytesRead;
-          if (requested > sizeof( buf ))
-            requested = sizeof( buf );
+          if (requested > sizeof(buf))
+            requested = sizeof(buf);
           actual = 0;
-    #ifndef LINUX
+#ifndef LINUX
           res = f_read(&file.data->handle, buf, requested, &actual);
-          if(res) break;
-    #else
+          if (res)
+            break;
+#else
           actual = fread(buf, 1, requested, file.data->handle);
-    #endif
-          if (actual>0) {
-            if (!buffer) {
+#endif
+          if (actual > 0)
+          {
+            if (!buffer)
+            {
               buffer = jsvNewFromEmptyString();
-              if (!buffer) return 0; // out of memory
+              if (!buffer)
+                return 0; // out of memory
               jsvStringIteratorNew(&it, buffer, 0);
             }
             size_t i;
-            for (i=0;i<actual;i++)
+            for (i = 0; i < actual; i++)
               jsvStringIteratorAppend(&it, buf[i]);
           }
           bytesRead += actual;
-          if(actual != requested) break;
+          if (actual != requested)
+            break;
         }
       }
     }
   }
-  if (res) jsfsReportError("Unable to read file", res);
+  if (res)
+    jsfsReportError("Unable to read file", res);
 
   if (buffer)
     jsvStringIteratorFree(&it);
@@ -555,28 +642,34 @@ Skip the specified number of bytes forward in the file
 }
 Seek to a certain position in the file
 */
-void jswrap_file_skip_or_seek(JsVar* parent, int nBytes, bool is_skip) {
-  if (nBytes<0) {
-    if ( is_skip ) 
-	  jsWarn("Bytes to skip must be >=0");
-    else 
-	  jsWarn("Position to seek to must be >=0");
+void jswrap_file_skip_or_seek(JsVar *parent, int nBytes, bool is_skip)
+{
+  if (nBytes < 0)
+  {
+    if (is_skip)
+      jsWarn("Bytes to skip must be >=0");
+    else
+      jsWarn("Position to seek to must be >=0");
     return;
   }
   FRESULT res = 0;
-  if (jsfsInit()) {
+  if (jsfsInit())
+  {
     JsFile file;
-    if (fileGetFromVar(&file, parent)) {
-      if(file.data->mode == FM_READ || file.data->mode == FM_WRITE || file.data->mode == FM_READ_WRITE) {
-  #ifndef LINUX
+    if (fileGetFromVar(&file, parent))
+    {
+      if (file.data->mode == FM_READ || file.data->mode == FM_WRITE || file.data->mode == FM_READ_WRITE)
+      {
+#ifndef LINUX
         res = (FRESULT)f_lseek(&file.data->handle, (DWORD)(is_skip ? f_tell(&file.data->handle) : 0) + (DWORD)nBytes);
-  #else
+#else
         fseek(file.data->handle, nBytes, is_skip ? SEEK_CUR : SEEK_SET);
-  #endif
+#endif
       }
     }
   }
-  if (res) jsfsReportError(is_skip?"Unable to skip":"Unable to seek", res);
+  if (res)
+    jsfsReportError(is_skip ? "Unable to skip" : "Unable to seek", res);
 }
 
 /*JSON{
@@ -631,42 +724,51 @@ format once, as each will erase the content.
 `E.flashFatFS({ addr:0x300000,sectors:100,format:true });`
 */
 
-int jswrap_E_flashFatFS(JsVar* options) {
+int jswrap_E_flashFatFS(JsVar *options)
+{
   uint32_t addr = FS_FLASH_BASE;
   uint16_t sectors = FS_SECTOR_COUNT;
   uint8_t format = 0;
-  if (jsvIsObject(options)) {
+  if (jsvIsObject(options))
+  {
     JsVar *a = jsvObjectGetChild(options, "addr", false);
-    if (a) {
-      if (jsvIsNumeric(a) && jsvGetInteger(a)>0x100000)
+    if (a)
+    {
+      if (jsvIsNumeric(a) && jsvGetInteger(a) > 0x100000)
         addr = (uint32_t)jsvGetInteger(a);
     }
     JsVar *s = jsvObjectGetChild(options, "sectors", false);
-    if (s) {
-      if (jsvIsNumeric(s) && jsvGetInteger(s)>0)
+    if (s)
+    {
+      if (jsvIsNumeric(s) && jsvGetInteger(s) > 0)
         sectors = (uint16_t)jsvGetInteger(s);
     }
     JsVar *f = jsvObjectGetChild(options, "format", false);
-    if (f) {
+    if (f)
+    {
       if (jsvIsBoolean(f))
         format = jsvGetBool(f);
     }
   }
-  else if (!jsvIsUndefined(options)) {
+  else if (!jsvIsUndefined(options))
+  {
     jsExceptionHere(JSET_TYPEERROR, "'options' must be an object, or undefined");
   }
-  
-  uint8_t init=flashFatFsInit(addr, sectors);
-  if (init) {
-    if ( format ) {
+
+  uint8_t init = flashFatFsInit(addr, sectors);
+  if (init)
+  {
+    if (format)
+    {
       uint8_t res = f_mount(&jsfsFAT, "", 0);
-      jsDebug(DBG_INFO,"Formatting Flash");
-      res = f_mkfs("", 1, 0);  // Super Floppy format, using all space (not partition table)
-      if (res != FR_OK) {
-        jsExceptionHere(JSET_INTERNALERROR, "Flash Formatting error:",res);
+      jsDebug(DBG_INFO, "Formatting Flash");
+      res = f_mkfs("", 1, 0); // Super Floppy format, using all space (not partition table)
+      if (res != FR_OK)
+      {
+        jsExceptionHere(JSET_INTERNALERROR, "Flash Formatting error:", res);
         return false;
-     }
-   }    
+      }
+    }
   }
   jsfsInit();
   return true;

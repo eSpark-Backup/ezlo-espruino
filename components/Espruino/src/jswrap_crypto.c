@@ -17,6 +17,7 @@
 #include "jsvariterator.h"
 #include "jswrap_crypto.h"
 #include "jsparse.h"
+#include "DeviceConfig.h"
 
 #ifdef USE_AES
 #include "mbedtls/aes.h"

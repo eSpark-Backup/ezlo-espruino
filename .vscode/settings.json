@@ -10,6 +10,8 @@
     "esp32_gap_func.h": "c",
     "sha1.h": "c",
     "string.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "deviceconfig.h": "c",
+    "jswrap_neopixel.h": "c"
   }
 }

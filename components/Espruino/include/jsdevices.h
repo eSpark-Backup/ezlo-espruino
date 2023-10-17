@@ -17,8 +17,7 @@
 #include "jsutils.h"
 #include "platform_config.h"
 #include "jsvar.h"
-
-#define USE_TELNET
+#include "DeviceConfig.h"
 
 #define BLUETOOTH
 

@@ -78,8 +78,6 @@ typedef struct
 #define BLE_GATT_HVX_INDICATION 2   // flag in CCCD
 #endif                              //! NRF5X (fudge NRF5X API for ESP32)
 
-#define ESP32 1
-
 #ifndef CENTRAL_LINK_COUNT                  /**<number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #if defined(NRF52_SERIES) || defined(ESP32) // nRF52 gets the ability to connect to other devices
 #define CENTRAL_LINK_COUNT 1

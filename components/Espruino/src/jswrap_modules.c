@@ -19,6 +19,7 @@
 #include "jsparse.h"
 #include "jsinteractive.h"
 #include "jswrapper.h"
+#include "DeviceConfig.h"
 #include "jsflash.h" // look in flash for modules
 #ifdef USE_FILESYSTEM
 #include "jswrap_fs.h"
@@ -31,7 +32,8 @@
 Built-in class that caches the modules used by the `require` command
  */
 
-static JsVar *jswrap_modules_getModuleList() {
+static JsVar *jswrap_modules_getModuleList()
+{
   return jsvObjectGetChild(execInfo.hiddenRoot, JSPARSE_MODULE_CACHE_NAME, JSV_OBJECT);
 }
 
@@ -62,30 +64,36 @@ print(s.read("test"));
 Check out [the page on Modules](/Modules) for an explanation of what modules are
 and how you can use them.
  */
-JsVar *jswrap_require(JsVar *moduleName) {
-  if (!jsvIsString(moduleName)) {
+JsVar *jswrap_require(JsVar *moduleName)
+{
+  if (!jsvIsString(moduleName))
+  {
     jsExceptionHere(JSET_TYPEERROR, "Expecting a module name as a string, but got %t", moduleName);
     return 0;
   }
   char moduleNameBuf[128];
-  if (jsvGetString(moduleName, moduleNameBuf, sizeof(moduleNameBuf))>=sizeof(moduleNameBuf)) {
+  if (jsvGetString(moduleName, moduleNameBuf, sizeof(moduleNameBuf)) >= sizeof(moduleNameBuf))
+  {
     jsExceptionHere(JSET_TYPEERROR, "Module name too long (max 128 chars)");
     return 0;
   }
 
   // Search to see if we have already loaded this module
   JsVar *moduleList = jswrap_modules_getModuleList();
-  if (!moduleList) return 0; // out of memory
+  if (!moduleList)
+    return 0; // out of memory
   JsVar *moduleExport = jsvSkipNameAndUnLock(jsvFindChildFromString(moduleList, moduleNameBuf, false));
   jsvUnLock(moduleList);
-  if (moduleExport) {
+  if (moduleExport)
+  {
     // Found the module!
     return moduleExport;
   }
 
   // Now check if it is built-in (as an actual native function)
   void *builtInLib = jswGetBuiltInLibrary(moduleNameBuf);
-  if (builtInLib) {
+  if (builtInLib)
+  {
     // create a 'fake' module that Espruino can use to map its built-in functions against
     moduleExport = jsvNewNativeFunction(builtInLib, 0);
   }
@@ -93,10 +101,12 @@ JsVar *jswrap_require(JsVar *moduleName) {
 #ifndef ESPR_EMBED
 #ifndef SAVE_ON_FLASH
   // Has it been manually saved to Flash Storage? Use Storage support.
-  if ((!moduleExport) && (strlen(moduleNameBuf) <= JSF_MAX_FILENAME_LENGTH)) {
+  if ((!moduleExport) && (strlen(moduleNameBuf) <= JSF_MAX_FILENAME_LENGTH))
+  {
     JsfFileName storageName = jsfNameFromString(moduleNameBuf);
-    JsVar *storageFile = jsfReadFile(storageName,0,0);
-    if (storageFile) {
+    JsVar *storageFile = jsfReadFile(storageName, 0, 0);
+    if (storageFile)
+    {
       moduleExport = jspEvaluateModule(storageFile);
       jsvUnLock(storageFile);
     }
@@ -106,11 +116,14 @@ JsVar *jswrap_require(JsVar *moduleName) {
 
   // Ok - it's not built-in as native or storage.
   // Look and see if it's compiled-in as a C-String of JS - if so get the actual text and execute it
-  if (!moduleExport) {
+  if (!moduleExport)
+  {
     const char *builtInJS = jswGetBuiltInJSLibrary(moduleNameBuf);
-    if (builtInJS) {
-      JsVar *fileContents = jsvNewNativeString((char*)builtInJS, strlen(builtInJS));       
-      if (fileContents) {
+    if (builtInJS)
+    {
+      JsVar *fileContents = jsvNewNativeString((char *)builtInJS, strlen(builtInJS));
+      if (fileContents)
+      {
         moduleExport = jspEvaluateModule(fileContents);
         jsvUnLock(fileContents);
       }
@@ -119,37 +132,43 @@ JsVar *jswrap_require(JsVar *moduleName) {
 
   // If we have filesystem support, look on the filesystem
 #ifdef USE_FILESYSTEM
-  if (!moduleExport) {
-    JsVar *fileContents = 0;        
+  if (!moduleExport)
+  {
+    JsVar *fileContents = 0;
     JsVar *modulePath = jsvNewFromString("node_modules/");
-    if (modulePath) { // out of memory
+    if (modulePath)
+    { // out of memory
       jsvAppendString(modulePath, moduleNameBuf);
-      jsvAppendString(modulePath,".js");
+      jsvAppendString(modulePath, ".js");
       fileContents = jswrap_fs_readFile(modulePath);
       jsvUnLock(modulePath);
       JsVar *exception = jspGetException();
-      if (exception) {  // throw away exception & file if we had one
+      if (exception)
+      { // throw away exception & file if we had one
         execInfo.execute = execInfo.execute & (JsExecFlags)~EXEC_EXCEPTION;
         jsvUnLock2(fileContents, exception);
         fileContents = 0;
       }
-      if (fileContents && jsvGetStringLength(fileContents)>0)
+      if (fileContents && jsvGetStringLength(fileContents) > 0)
         moduleExport = jspEvaluateModule(fileContents);
       jsvUnLock(fileContents);
     }
   }
-#endif    
-   
+#endif
 
-  if (moduleExport) { // Found - now save module
+  if (moduleExport)
+  { // Found - now save module
     JsVar *moduleList = jswrap_modules_getModuleList();
     if (moduleList)
       jsvObjectSetChild(moduleList, moduleNameBuf, moduleExport);
     jsvUnLock(moduleList);
-  } else { // module not found...
+  }
+  else
+  { // module not found...
 #ifdef ESPRUINOWIFI
     // Big hack to work around module renaming. IF EspruinoWiFi wasn't found, rename it
-    if (!strcmp(moduleNameBuf,"EspruinoWiFi")) {
+    if (!strcmp(moduleNameBuf, "EspruinoWiFi"))
+    {
       JsVar *n = jsvNewFromString("Wifi");
       JsVar *r = jswrap_require(n);
       jsvUnLock(n);
@@ -172,18 +191,22 @@ JsVar *jswrap_require(JsVar *moduleName) {
 }
 Return an array of module names that have been cached
  */
-JsVar *jswrap_modules_getCached() {
+JsVar *jswrap_modules_getCached()
+{
   JsVar *arr = jsvNewEmptyArray();
-  if (!arr) return 0; // out of memory
+  if (!arr)
+    return 0; // out of memory
 
   JsVar *moduleList = jswrap_modules_getModuleList();
-  if (!moduleList) return arr; // out of memory
+  if (!moduleList)
+    return arr; // out of memory
 
   JsvObjectIterator it;
   jsvObjectIteratorNew(&it, moduleList);
-  while (jsvObjectIteratorHasValue(&it)) {
+  while (jsvObjectIteratorHasValue(&it))
+  {
     JsVar *idx = jsvObjectIteratorGetKey(&it);
-    JsVar *idxCopy  = jsvCopyNameOnly(idx, false, false);
+    JsVar *idxCopy = jsvCopyNameOnly(idx, false, false);
     jsvArrayPushAndUnLock(arr, idxCopy);
     jsvUnLock(idx);
     jsvObjectIteratorNext(&it);
@@ -204,18 +227,24 @@ JsVar *jswrap_modules_getCached() {
 }
 Remove the given module from the list of cached modules
  */
-void jswrap_modules_removeCached(JsVar *id) {
-  if (!jsvIsString(id)) {
+void jswrap_modules_removeCached(JsVar *id)
+{
+  if (!jsvIsString(id))
+  {
     jsExceptionHere(JSET_ERROR, "The argument to removeCached must be a string");
     return;
   }
   JsVar *moduleList = jswrap_modules_getModuleList();
-  if (!moduleList) return; // out of memory
+  if (!moduleList)
+    return; // out of memory
 
   JsVar *moduleExportName = jsvFindChildFromVar(moduleList, id, false);
-  if (!moduleExportName) {
+  if (!moduleExportName)
+  {
     jsExceptionHere(JSET_ERROR, "Module %q not found", id);
-  } else {
+  }
+  else
+  {
     jsvRemoveChild(moduleList, moduleExportName);
     jsvUnLock(moduleExportName);
   }
@@ -231,9 +260,11 @@ void jswrap_modules_removeCached(JsVar *id) {
 }
 Remove all cached modules
  */
-void jswrap_modules_removeAllCached() {
+void jswrap_modules_removeAllCached()
+{
   JsVar *moduleList = jswrap_modules_getModuleList();
-  if (!moduleList) return; // out of memory
+  if (!moduleList)
+    return; // out of memory
   jsvRemoveAllChildren(moduleList);
   jsvUnLock(moduleList);
 }
@@ -250,23 +281,28 @@ void jswrap_modules_removeAllCached() {
 }
 Add the given module to the cache
  */
-void jswrap_modules_addCached(JsVar *id, JsVar *sourceCode) {
+void jswrap_modules_addCached(JsVar *id, JsVar *sourceCode)
+{
   if (!jsvIsString(id) ||
-      !(jsvIsString(sourceCode) || jsvIsFunction(sourceCode))) {
+      !(jsvIsString(sourceCode) || jsvIsFunction(sourceCode)))
+  {
     jsExceptionHere(JSET_ERROR, "args must be addCached(string, string|function)");
     return;
   }
 
   JsVar *moduleList = jswrap_modules_getModuleList();
-  if (!moduleList) return; // out of memory
+  if (!moduleList)
+    return; // out of memory
 
   JsVar *moduleExport = jspEvaluateModule(sourceCode);
-  if (!moduleExport) {
+  if (!moduleExport)
+  {
     jsExceptionHere(JSET_ERROR, "Unable to load module %q", id);
-  } else {
+  }
+  else
+  {
     jsvObjectSetChildVar(moduleList, id, moduleExport);
     jsvUnLock(moduleExport);
   }
   jsvUnLock(moduleList);
-
 }

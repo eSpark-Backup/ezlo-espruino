@@ -12,11 +12,11 @@
  * ----------------------------------------------------------------------------
  */
 
- #include "platform_config.h"
- 
- // Ideally these should be defined in the BOARD.py file...
- 
- // 1MB = 1024*1024 / 4096 = 256
+#include "platform_config.h"
+#include "DeviceConfig.h"
+// Ideally these should be defined in the BOARD.py file...
+
+// 1MB = 1024*1024 / 4096 = 256
 #ifdef USE_ESP32
 #define FS_SECTOR_COUNT 256
 #else
@@ -30,4 +30,4 @@
 // last 1Mb block in 4MB Flash
 #define FS_FLASH_BASE 0x300000;
 
-uint8_t flashFatFsInit( uint32_t addr, uint16_t sectors );
+uint8_t flashFatFsInit(uint32_t addr, uint16_t sectors);

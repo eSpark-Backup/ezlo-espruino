@@ -207,7 +207,7 @@ void app_main(void)
     task_init(espruinoTask, "EspruinoTask", ESP_STACK_SIZE, 5, 0);
     task_init(uartTask, "ConsoleTask", 2200, 20, 0);
 #else
-    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", 2500, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", ESP_STACK_SIZE, NULL, 5, NULL, 0);
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, NULL, 0);
 #endif
 

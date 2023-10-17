@@ -14,6 +14,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include "DeviceConfig.h"
+
 #ifdef NRF52_SERIES
 #include "i2s_ws2812b_drive.h"
 #endif
@@ -36,7 +38,6 @@
 
 /** Send the given RGB pixel data out to neopixel/WS2811/APA104/etc */
 bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize);
-
 
 /*JSON{
   "type" : "library",
@@ -96,8 +97,8 @@ multiple of 3 bytes long. Just round the size up - it won't cause any problems.
 * On some platforms like STM32, pins capable of hardware SPI MOSI are required.
 
 * On STM32, `neopixel.write` chooses a hardware SPI device to output the signal on
-and uses that. However in order to avoid spikes in the output, if that hardware device is *already 
-initialised* it will not be re-initialised. This means that if the SPI device was already in use, 
+and uses that. However in order to avoid spikes in the output, if that hardware device is *already
+initialised* it will not be re-initialised. This means that if the SPI device was already in use,
 you may have to use `SPIx.setup({baud:3200000, mosi:the_pin})` to force it to be re-setup on the pin.
 
 * Espruino devices tend to have 3.3v IO, while WS2812/etc run off of 5v. Many
@@ -109,17 +110,21 @@ pullup resistor to 5v on STM32 based boards (nRF52 are not 5v tolerant so you
 can't do this), or can use a level shifter to shift the voltage up into the 5v
 range.
 */
-void jswrap_neopixel_write(Pin pin, JsVar *data) {
+void jswrap_neopixel_write(Pin pin, JsVar *data)
+{
   JSV_GET_AS_CHAR_ARRAY(rgbData, rgbSize, data);
-  if (!rgbData) {
+  if (!rgbData)
+  {
     jsExceptionHere(JSET_ERROR, "Couldn't convert %t to data to send to LEDs", data);
     return;
   }
-  if (rgbSize == 0) {
+  if (rgbSize == 0)
+  {
     jsExceptionHere(JSET_ERROR, "Data must be a non empty array.");
     return;
   }
-  if (rgbSize % 3 != 0) {
+  if (rgbSize % 3 != 0)
+  {
     jsExceptionHere(JSET_ERROR, "Data length must be a multiple of 3 (RGB).");
     return;
   }
@@ -127,14 +132,14 @@ void jswrap_neopixel_write(Pin pin, JsVar *data) {
   neopixelWrite(pin, (unsigned char *)rgbData, rgbSize);
 }
 
-
 // -----------------------------------------------------------------------------------
 // -------------------------------------------------------------- Platform specific
 // -----------------------------------------------------------------------------------
 
 #if defined(WIO_LTE)
 
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
   return stm32_neopixelWrite(pin, rgbData, rgbSize);
 }
 
@@ -143,21 +148,26 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
 extern Pin jshNeoPixelPin; ///< The currently setup Neopixel pin (set by jswrap_neopixel). This is reset to PIN_UNDEFINED if we think anything could have messed it up
 
 // this one could potentially work on other platforms as well...
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
-  if (!jshIsPinValid(pin)) {
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
+  if (!jshIsPinValid(pin))
+  {
     jsExceptionHere(JSET_ERROR, "Pin is not valid.");
     return false;
   }
   JshPinFunction spiDevice = 0;
   unsigned int i;
-  for (i=0;i<JSH_PININFO_FUNCTIONS;i++) {
+  for (i = 0; i < JSH_PININFO_FUNCTIONS; i++)
+  {
     if (JSH_PINFUNCTION_IS_SPI(pinInfo[pin].functions[i]) &&
-        ((pinInfo[pin].functions[i] & JSH_MASK_INFO)==JSH_SPI_MOSI)) {
+        ((pinInfo[pin].functions[i] & JSH_MASK_INFO) == JSH_SPI_MOSI))
+    {
       spiDevice = pinInfo[pin].functions[i];
     }
   }
   IOEventFlags device = jshGetFromDevicePinFunction(spiDevice);
-  if (!spiDevice || !device) {
+  if (!spiDevice || !device)
+  {
     jsExceptionHere(JSET_ERROR, "No suitable SPI device found for this pin\n");
     return false;
   }
@@ -165,7 +175,8 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
   jshSPIInitInfo(&inf);
   inf.baudRate = 3200000;
   inf.pinMOSI = pin;
-  if (jshNeoPixelPin != pin) {
+  if (jshNeoPixelPin != pin)
+  {
     jshSPISetup(device, &inf);
     jshNeoPixelPin = pin;
   }
@@ -173,41 +184,45 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
   // we're just sending (no receive)
   jshSPISetReceive(device, false);
   jshInterruptOff();
-  for (i=0;i<rgbSize;i++)
+  for (i = 0; i < rgbSize; i++)
     jsspiSend4bit(device, rgbData[i], 1, 3);
   jshInterruptOn();
-  jshSPIWait(device); // wait until SPI send finished and clear the RX buffer
+  jshSPIWait(device);         // wait until SPI send finished and clear the RX buffer
   jshSPISet16(device, false); // back to 8 bit
   return true;
 }
 
-
 #elif defined(NRF52_SERIES) // ----------------------------------------------------------------
 
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
 #ifdef NRF52_SERIES
-  if (!jshIsPinValid(pin)) {
+  if (!jshIsPinValid(pin))
+  {
     jsExceptionHere(JSET_ERROR, "Pin is not valid.");
     return false;
   }
-  return !i2s_ws2812b_drive_xfer((rgb_led_t *)rgbData, rgbSize/3, pinInfo[pin].pin);
+  return !i2s_ws2812b_drive_xfer((rgb_led_t *)rgbData, rgbSize / 3, pinInfo[pin].pin);
 #else
   jsExceptionHere(JSET_ERROR, "Neopixel writing not implemented");
   return false;
 #endif
 }
 
-
 #elif defined(ESP8266) // ----------------------------------------------------------------
 
-static inline uint32_t _getCycleCount(void) {
+static inline uint32_t _getCycleCount(void)
+{
   uint32_t ccount;
-  __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
+  __asm__ __volatile__("rsr %0,ccount"
+                       : "=a"(ccount));
   return ccount;
 }
 
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
-  if (!jshIsPinValid(pin)) {
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
+  if (!jshIsPinValid(pin))
+  {
     jsExceptionHere(JSET_ERROR, "Pin is not valid.");
     return false;
   }
@@ -215,10 +230,11 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
     jshPinSetState(pin, JSHPINSTATE_GPIO_OUT);
 
   // values for 160Mhz clock
-  uint8_t tOne =  90;  // one bit, high typ 800ns
-  uint8_t tZero = 40;  // zero bit, high typ 300ns
-  uint8_t tLow = 170;  // total cycle, typ 1.2us
-  if (system_get_cpu_freq() < 100) {
+  uint8_t tOne = 90;  // one bit, high typ 800ns
+  uint8_t tZero = 40; // zero bit, high typ 300ns
+  uint8_t tLow = 170; // total cycle, typ 1.2us
+  if (system_get_cpu_freq() < 100)
+  {
     tOne = 56;  // 56 cyc = 700ns
     tZero = 14; // 14 cycl = 175ns
     tLow = 100;
@@ -234,63 +250,79 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
   // same "low" for the full loop as we had before entering this function. This way no LED
   // gets set to the wrong value and we load the cache line so the second iteration, i.e.,
   // first real LED bit, runs at full speed.
-  uint32_t pinMask = _BV(pin);    // bit mask for GPIO pin to write to reg
+  uint32_t pinMask = _BV(pin);     // bit mask for GPIO pin to write to reg
   uint8_t *p = (uint8_t *)rgbData; // pointer to walk through pixel array
-  uint8_t *end = p + rgbSize;  // pointer to end of array
-  uint8_t pix = *p++;             // current byte being shifted out
-  uint8_t mask = 0x80;            // mask for current bit
-  uint32_t start;                 // start time of bit
+  uint8_t *end = p + rgbSize;      // pointer to end of array
+  uint8_t pix = *p++;              // current byte being shifted out
+  uint8_t mask = 0x80;             // mask for current bit
+  uint32_t start;                  // start time of bit
   // adjust things for the pre-roll
-  p--;                            // next byte we fetch will be the first byte again
-  mask = 0x01;                    // fetch the next byte at the end of the first loop iteration
-  pinMask = 0;                    // zero mask means we set or clear no I/O pin
+  p--;         // next byte we fetch will be the first byte again
+  mask = 0x01; // fetch the next byte at the end of the first loop iteration
+  pinMask = 0; // zero mask means we set or clear no I/O pin
   // iterate through all bits
-  ets_intr_lock();                // disable most interrupts
-  while(1) {
+  ets_intr_lock(); // disable most interrupts
+  while (1)
+  {
     uint32_t t;
-    if (pix & mask) t = tOne;
-    else            t = tZero;
-    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);  // Set high
-    start = _getCycleCount();                        // get start time of this bit
-    while (_getCycleCount()-start < t) ;             // busy-wait
-    GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);  // Set low
-    if (!(mask >>= 1)) {                             // Next bit/byte?
-      if (p >= end) break;                           // at end, we're done
+    if (pix & mask)
+      t = tOne;
+    else
+      t = tZero;
+    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask); // Set high
+    start = _getCycleCount();                       // get start time of this bit
+    while (_getCycleCount() - start < t)
+      ;                                             // busy-wait
+    GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask); // Set low
+    if (!(mask >>= 1))
+    { // Next bit/byte?
+      if (p >= end)
+        break; // at end, we're done
       pix = *p++;
       mask = 0x80;
       pinMask = _BV(pin);
     }
-    while (_getCycleCount()-start < tLow) ;          // busy-wait
+    while (_getCycleCount() - start < tLow)
+      ; // busy-wait
   }
-  while (_getCycleCount()-start < tLow) ;            // wait for last bit
+  while (_getCycleCount() - start < tLow)
+    ; // wait for last bit
   ets_intr_unlock();
 
 #else
 
   // this is the code without preloading the first bit
-  uint32_t pinMask = _BV(pin);    // bit mask for GPIO pin to write to reg
+  uint32_t pinMask = _BV(pin);     // bit mask for GPIO pin to write to reg
   uint8_t *p = (uint8_t *)rgbData; // pointer to walk through pixel array
-  uint8_t *end = p + rgbSize;  // pointer to end of array
-  uint8_t pix = *p++;             // current byte being shifted out
-  uint8_t mask = 0x80;            // mask for current bit
-  uint32_t start;                 // start time of bit
+  uint8_t *end = p + rgbSize;      // pointer to end of array
+  uint8_t pix = *p++;              // current byte being shifted out
+  uint8_t mask = 0x80;             // mask for current bit
+  uint32_t start;                  // start time of bit
   // iterate through all bits
-  while(1) {
+  while (1)
+  {
     uint32_t t;
-    if (pix & mask) t = 56; // one bit, high typ 800ns (56 cyc = 700ns)
-    else            t = 14; // zero bit, high typ 300ns (14 cycl = 175ns)
-    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);  // Set high
-    start = _getCycleCount();                        // get start time of this bit
-    while (_getCycleCount()-start < t) ;             // busy-wait
-    GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);  // Set low
-    if (!(mask >>= 1)) {                             // Next bit/byte?
-      if (p >= end) break;                           // at end, we're done
+    if (pix & mask)
+      t = 56; // one bit, high typ 800ns (56 cyc = 700ns)
+    else
+      t = 14;                                       // zero bit, high typ 300ns (14 cycl = 175ns)
+    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask); // Set high
+    start = _getCycleCount();                       // get start time of this bit
+    while (_getCycleCount() - start < t)
+      ;                                             // busy-wait
+    GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask); // Set low
+    if (!(mask >>= 1))
+    { // Next bit/byte?
+      if (p >= end)
+        break; // at end, we're done
       pix = *p++;
       mask = 0x80;
     }
-    while (_getCycleCount()-start < 100) ;           // busy-wait, 100 cyc = 1.25us
+    while (_getCycleCount() - start < 100)
+      ; // busy-wait, 100 cyc = 1.25us
   }
-  while (_getCycleCount()-start < 100) ;             // Wait for last bit
+  while (_getCycleCount() - start < 100)
+    ; // Wait for last bit
 
 #endif
 #undef _BV
@@ -299,13 +331,15 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
 
 #elif defined(ESP32)
 
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize){
-  return esp32_neopixelWrite(pin,rgbData, rgbSize);
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
+  return esp32_neopixelWrite(pin, rgbData, rgbSize);
 }
 
 #else
 
-bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize) {
+bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
+{
   jsExceptionHere(JSET_ERROR, "Neopixel writing not implemented");
   return false;
 }

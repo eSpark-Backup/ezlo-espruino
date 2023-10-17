@@ -15,6 +15,7 @@
 #define JSUTILS_H_
 
 #include "platform_config.h"
+#include "DeviceConfig.h"
 
 #ifndef ESPR_EMBED
 #include "jstypes.h"
@@ -62,7 +63,7 @@
 #define USE_FLASH_MEMORY
 
 // For the esp8266 we need the posibility to store arrays in flash, because mem is so small
-#define IN_FLASH_MEMORY   __attribute__((section(".irom.literal"))) __attribute__((aligned(4)))
+#define IN_FLASH_MEMORY __attribute__((section(".irom.literal"))) __attribute__((aligned(4)))
 
 /** Place constant strings into flash when we can in order to save RAM space. Strings in flash
     must be accessed with word reads on aligned boundaries, so we'll have to copy them before
@@ -90,7 +91,7 @@ int flash_strcmp(const char *mem, const char *flash);
 #define READ_FLASH_UINT8(ptr) ({ uint32_t __p = (uint32_t)(char*)(ptr); volatile uint32_t __d = *(uint32_t*)(__p & (uint32_t)~3); ((uint8_t*)&__d)[__p & 3]; })
 
 /** Read a uint16_t from this pointer, which could be in RAM or Flash. */
-#define READ_FLASH_UINT16(ptr) (READ_FLASH_UINT8(ptr) | (READ_FLASH_UINT8(((char*)ptr)+1)<<8) )
+#define READ_FLASH_UINT16(ptr) (READ_FLASH_UINT8(ptr) | (READ_FLASH_UINT8(((char *)ptr) + 1) << 8))
 
 #else
 
@@ -103,11 +104,11 @@ int flash_strcmp(const char *mem, const char *flash);
 
 /** Read a uint8_t from this pointer, which could be in RAM or Flash.
     On ARM this is just a standard read, it's different on ESP8266 */
-#define READ_FLASH_UINT8(ptr) (*(uint8_t*)(ptr))
+#define READ_FLASH_UINT8(ptr) (*(uint8_t *)(ptr))
 
 /** Read a uint16_t from this pointer, which could be in RAM or Flash.
     On ARM this is just a standard read, it's different on ESP8266 */
-#define READ_FLASH_UINT16(ptr) (*(uint16_t*)(ptr))
+#define READ_FLASH_UINT16(ptr) (*(uint16_t *)(ptr))
 
 /** FLASH_STRCMP is simply strcmp, it's only special on ESP8266 */
 #define FLASH_STRCMP strcmp
@@ -123,7 +124,6 @@ typedef uint32_t JsfWord;
 #define JSF_ALIGNMENT 4
 #define JSF_WORD_UNSET 0xFFFFFFFF
 #endif
-
 
 #if defined(ESP8266)
 /** For the esp8266 we need to add CALLED_FROM_INTERRUPT to all functions that may execute at
@@ -141,15 +141,15 @@ typedef uint32_t JsfWord;
 
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
-#define NOT_USED(x) ( (void)(x) )
+#define NOT_USED(x) ((void)(x))
 
 #if !defined(__USB_TYPE_H) && !defined(CPLUSPLUS) && !defined(__cplusplus) // it is defined in this file too!
 #undef FALSE
 #undef TRUE
-//typedef enum {FALSE = 0, TRUE = !FALSE} bool;
+// typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 #define FALSE (0)
 #define TRUE (1)
-//typedef unsigned char bool;
+// typedef unsigned char bool;
 #endif
 
 #ifndef DBL_MIN
@@ -178,97 +178,95 @@ See comments after JsVar in jsvar.c for more info.
 */
 
 #ifdef RESIZABLE_JSVARS
- // Probably Linux - 32 bits allow us to allocate more blocks of variables,
- // but is a lot less efficient with memory
-  typedef uint32_t JsVarRef;
-  typedef int32_t JsVarRefSigned;
-  #define JSVARREF_BITS 32
-  #define JSVARREFCOUNT_BITS 8
-  #define JSVARREF_MIN (-2147483648)
-  #define JSVARREF_MAX (2147483647)
+// Probably Linux - 32 bits allow us to allocate more blocks of variables,
+// but is a lot less efficient with memory
+typedef uint32_t JsVarRef;
+typedef int32_t JsVarRefSigned;
+#define JSVARREF_BITS 32
+#define JSVARREFCOUNT_BITS 8
+#define JSVARREF_MIN (-2147483648)
+#define JSVARREF_MAX (2147483647)
 #else
-   /** JsVarRaf stores References for variables - We treat 0 as null
-   *  NOTE: we store JSVAR_DATA_STRING_* as actual values so we can do #if on them below
-   *
-   */
-  #if JSVAR_FORCE_16_BYTE // Forces full 16 bits used -> 16 bit JsVar
-    // This creates less (and faster) code for the Espruino interpreter,
-    // but isn't as efficient with memory.
-    #define JSVARREF_BITS 16
-    #define JSVARREFCOUNT_BITS 8
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-    // Otherwise use just enough bits for everything we need. We set
-    // JSVARREF_BITS to enough for JSVAR_CACHE_SIZE, and then look at
-    // how much space is left over, and adjust JSVARREFCOUNT_BITS
-    // to fit in what is remaining
-  #elif JSVAR_CACHE_SIZE <= 254 // 12 bytes
-    #define JSVARREF_BITS 8
-    #define JSVARREFCOUNT_PACK_BITS 8 // ensure we have enough space to store a 'double'. This is effectively just wasted space
-    #define JSVARREFCOUNT_BITS 6
-    typedef uint8_t JsVarRef;
-    typedef int8_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 1023 // 12 bytes
-    #define JSVARREF_BITS 10
-    #define JSVARREFCOUNT_PACK_BITS 2 // ensure we have enough space to store a 'double'
-    #define JSVARREFCOUNT_BITS 6 // 48 - (10*4 + 2)
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 2047 // 12 bytes
-    #define JSVARREF_BITS 11
-    #define JSVARREFCOUNT_BITS 4 // 48 - 11*4
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 4095 // 13 bytes
-    #define JSVARREF_BITS 12
-    #define JSVARREFCOUNT_BITS 8 // 56 - 12*4
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 8191 // 13 bytes
-    #define JSVARREF_BITS 13
-    #define JSVARREFCOUNT_BITS 4 // 56 - 13*4
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 16383 // 14 bytes
-    #define JSVARREF_BITS 14
-    #define JSVARREFCOUNT_BITS 8 // 64 - 13*4
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #elif JSVAR_CACHE_SIZE <= 65535 // 16 bytes
-    #define JSVARREF_BITS 16
-    #define JSVARREFCOUNT_BITS 8
-    typedef uint16_t JsVarRef;
-    typedef int16_t JsVarRefSigned;
-  #else
-    #error "Assuming 16 bit refs we can't go above 65534 elements"
-  #endif
-  #define JSVARREF_MIN (-(1<<(JSVARREF_BITS-1)))
-  #define JSVARREF_MAX ((1<<(JSVARREF_BITS-1))-1)
+/** JsVarRaf stores References for variables - We treat 0 as null
+ *  NOTE: we store JSVAR_DATA_STRING_* as actual values so we can do #if on them below
+ *
+ */
+#if JSVAR_FORCE_16_BYTE // Forces full 16 bits used -> 16 bit JsVar
+// This creates less (and faster) code for the Espruino interpreter,
+// but isn't as efficient with memory.
+#define JSVARREF_BITS 16
+#define JSVARREFCOUNT_BITS 8
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+// Otherwise use just enough bits for everything we need. We set
+// JSVARREF_BITS to enough for JSVAR_CACHE_SIZE, and then look at
+// how much space is left over, and adjust JSVARREFCOUNT_BITS
+// to fit in what is remaining
+#elif JSVAR_CACHE_SIZE <= 254 // 12 bytes
+#define JSVARREF_BITS 8
+#define JSVARREFCOUNT_PACK_BITS 8 // ensure we have enough space to store a 'double'. This is effectively just wasted space
+#define JSVARREFCOUNT_BITS 6
+typedef uint8_t JsVarRef;
+typedef int8_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 1023 // 12 bytes
+#define JSVARREF_BITS 10
+#define JSVARREFCOUNT_PACK_BITS 2 // ensure we have enough space to store a 'double'
+#define JSVARREFCOUNT_BITS 6      // 48 - (10*4 + 2)
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 2047    // 12 bytes
+#define JSVARREF_BITS 11
+#define JSVARREFCOUNT_BITS 4   // 48 - 11*4
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 4095 // 13 bytes
+#define JSVARREF_BITS 12
+#define JSVARREFCOUNT_BITS 8   // 56 - 12*4
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 8191 // 13 bytes
+#define JSVARREF_BITS 13
+#define JSVARREFCOUNT_BITS 4    // 56 - 13*4
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 16383 // 14 bytes
+#define JSVARREF_BITS 14
+#define JSVARREFCOUNT_BITS 8    // 64 - 13*4
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#elif JSVAR_CACHE_SIZE <= 65535 // 16 bytes
+#define JSVARREF_BITS 16
+#define JSVARREFCOUNT_BITS 8
+typedef uint16_t JsVarRef;
+typedef int16_t JsVarRefSigned;
+#else
+#error "Assuming 16 bit refs we can't go above 65534 elements"
+#endif
+#define JSVARREF_MIN (-(1 << (JSVARREF_BITS - 1)))
+#define JSVARREF_MAX ((1 << (JSVARREF_BITS - 1)) - 1)
 #endif
 
 #ifndef JSVARREFCOUNT_PACK_BITS
 #define JSVARREFCOUNT_PACK_BITS 0
 #endif
 
-
-#define JSVARREFCOUNT_MAX ((1<<JSVARREFCOUNT_BITS)-1)
+#define JSVARREFCOUNT_MAX ((1 << JSVARREFCOUNT_BITS) - 1)
 
 #if defined(__WORDSIZE) && __WORDSIZE == 64
 // 64 bit needs extra space to be able to store a function pointer
 /// Max length of JSV_NAME_ strings
-#define JSVAR_DATA_STRING_NAME_LEN  8
+#define JSVAR_DATA_STRING_NAME_LEN 8
 #else
 /// Max length of JSV_NAME_ strings
-#define JSVAR_DATA_STRING_NAME_LEN  4
+#define JSVAR_DATA_STRING_NAME_LEN 4
 #endif
 /// these should be the same, but if we use sizeof in the #defines below they won't be constant
-#define JSVAR_DATA_STRING_NAME_LEN_  sizeof(size_t)
-
+#define JSVAR_DATA_STRING_NAME_LEN_ sizeof(size_t)
 
 /// Max length for a JSV_STRING, JsVar.varData.ref.refs (see comments under JsVar decl in jsvar.h)
-#define JSVAR_DATA_STRING_LEN (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS*3 + JSVARREFCOUNT_PACK_BITS)>>3))
+#define JSVAR_DATA_STRING_LEN (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS * 3 + JSVARREFCOUNT_PACK_BITS) >> 3))
 /// Max length for a JSV_STRINGEXT, JsVar.varData.ref.lastChild (see comments under JsVar decl in jsvar.h)
-#define JSVAR_DATA_STRING_MAX_LEN (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS*3 + JSVARREFCOUNT_PACK_BITS + JSVARREFCOUNT_BITS)>>3))
+#define JSVAR_DATA_STRING_MAX_LEN (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS * 3 + JSVARREFCOUNT_PACK_BITS + JSVARREFCOUNT_BITS) >> 3))
 
 /*
 In the above, ideally we'd just ask the compiler for the the address offset of the relevant
@@ -281,19 +279,18 @@ field, but because they are bitfields we can't get pointers to them!
 
 typedef uint16_t JsVarRefCounter;
 // Sanity checks
-#if (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS*3 + JSVARREFCOUNT_PACK_BITS)>>3)) < 8
+#if (JSVAR_DATA_STRING_NAME_LEN + ((JSVARREF_BITS * 3 + JSVARREFCOUNT_PACK_BITS) >> 3)) < 8
 #pragma message "required length (bits) : 64"
-#pragma message "initial data block length (bits) : " STRINGIFY(JSVAR_DATA_STRING_NAME_LEN*8)
-#pragma message "3x refs plus packing (bits) : " STRINGIFY(JSVARREF_BITS*3 + JSVARREFCOUNT_PACK_BITS)
+#pragma message "initial data block length (bits) : " STRINGIFY(JSVAR_DATA_STRING_NAME_LEN * 8)
+#pragma message "3x refs plus packing (bits) : " STRINGIFY(JSVARREF_BITS * 3 + JSVARREFCOUNT_PACK_BITS)
 #error JsVarDataRef is not big enough to store a double value
 #endif
-
 
 #define JSSYSTIME_MAX 0x7FFFFFFFFFFFFFFFLL
 typedef int64_t JsSysTime;
 #define JSSYSTIME_INVALID ((JsSysTime)-1)
 
-#define JSLEX_MAX_TOKEN_LENGTH  64 ///< Maximum length we allow tokens (eg. variable names) to be
+#define JSLEX_MAX_TOKEN_LENGTH 64  ///< Maximum length we allow tokens (eg. variable names) to be
 #define JS_ERROR_TOKEN_BUF_SIZE 16 ///< see jslTokenAsString
 
 #define JS_NUMBER_BUFFER_SIZE 70 ///< Enough for 64 bit base 2 + minus + terminating 0
@@ -304,25 +301,25 @@ typedef int64_t JsSysTime;
  * Note that the check for free variables takes an amount of time proportional
  * to the size of JS_VARS_BEFORE_IDLE_GC */
 #ifdef JSVAR_CACHE_SIZE
-#define JS_VARS_BEFORE_IDLE_GC (JSVAR_CACHE_SIZE/20)
+#define JS_VARS_BEFORE_IDLE_GC (JSVAR_CACHE_SIZE / 20)
 #else
 #define JS_VARS_BEFORE_IDLE_GC 32
 #endif
 
 // javascript specific names
-#define JSPARSE_RETURN_VAR JS_HIDDEN_CHAR_STR"rtn" // variable name used for returning function results
+#define JSPARSE_RETURN_VAR JS_HIDDEN_CHAR_STR "rtn" // variable name used for returning function results
 #define JSPARSE_PROTOTYPE_VAR "prototype"
 #define JSPARSE_CONSTRUCTOR_VAR "constructor"
 #define JSPARSE_INHERITS_VAR "__proto__"
 // internal names that hopefully nobody will be able to access
 #define JS_HIDDEN_CHAR '\xFF' // initial character of var name determines that we shouldn't see this stuff
 #define JS_HIDDEN_CHAR_STR "\xFF"
-#define JSPARSE_FUNCTION_CODE_NAME JS_HIDDEN_CHAR_STR"cod" // the function's code!
-#define JSPARSE_FUNCTION_JIT_CODE_NAME JS_HIDDEN_CHAR_STR"jit" // the function's code for a JIT function
-#define JSPARSE_FUNCTION_SCOPE_NAME JS_HIDDEN_CHAR_STR"sco" // the scope of the function's definition
-#define JSPARSE_FUNCTION_THIS_NAME JS_HIDDEN_CHAR_STR"ths" // the 'this' variable - for bound functions
-#define JSPARSE_FUNCTION_NAME_NAME JS_HIDDEN_CHAR_STR"nam" // for named functions (a = function foo() { foo(); })
-#define JSPARSE_FUNCTION_LINENUMBER_NAME JS_HIDDEN_CHAR_STR"lin" // The line number offset of the function
+#define JSPARSE_FUNCTION_CODE_NAME JS_HIDDEN_CHAR_STR "cod"       // the function's code!
+#define JSPARSE_FUNCTION_JIT_CODE_NAME JS_HIDDEN_CHAR_STR "jit"   // the function's code for a JIT function
+#define JSPARSE_FUNCTION_SCOPE_NAME JS_HIDDEN_CHAR_STR "sco"      // the scope of the function's definition
+#define JSPARSE_FUNCTION_THIS_NAME JS_HIDDEN_CHAR_STR "ths"       // the 'this' variable - for bound functions
+#define JSPARSE_FUNCTION_NAME_NAME JS_HIDDEN_CHAR_STR "nam"       // for named functions (a = function foo() { foo(); })
+#define JSPARSE_FUNCTION_LINENUMBER_NAME JS_HIDDEN_CHAR_STR "lin" // The line number offset of the function
 #define JS_EVENT_PREFIX "#on"
 #define JS_TIMEZONE_VAR "tz"
 #ifndef ESPR_NO_DAYLIGHT_SAVING
@@ -330,41 +327,57 @@ typedef int64_t JsSysTime;
 #endif
 #define JS_GRAPHICS_VAR "gfx"
 
-#define JSPARSE_EXCEPTION_VAR "except" // when exceptions are thrown, they're stored in the root scope
+#define JSPARSE_EXCEPTION_VAR "except"  // when exceptions are thrown, they're stored in the root scope
 #define JSPARSE_STACKTRACE_VAR "sTrace" // for errors/exceptions, a stack trace is stored as a string
 #define JSPARSE_MODULE_CACHE_NAME "modules"
 
 #if !defined(NO_ASSERT)
- #ifdef USE_FLASH_MEMORY
-   // Place assert strings into flash to save RAM
-   #define assert(X) do { \
-     FLASH_STR(flash_X, __STRING(X)); \
-     if (!(X)) jsAssertFail(__FILE__,__LINE__,flash_X); \
-   } while(0)
- #elif defined(__STRING)
-   // Normal assert with string in RAM
-   #define assert(X) do { if (!(X)) jsAssertFail(__FILE__,__LINE__,__STRING(X)); } while(0)
- #else
-   // Limited assert due to compiler not being able to stringify a parameter
-   #define assert(X) do { if (!(X)) jsAssertFail(__FILE__,__LINE__,""); } while(0)
- #endif
+#ifdef USE_FLASH_MEMORY
+// Place assert strings into flash to save RAM
+#define assert(X)                                \
+  do                                             \
+  {                                              \
+    FLASH_STR(flash_X, __STRING(X));             \
+    if (!(X))                                    \
+      jsAssertFail(__FILE__, __LINE__, flash_X); \
+  } while (0)
+#elif defined(__STRING)
+// Normal assert with string in RAM
+#define assert(X)                                    \
+  do                                                 \
+  {                                                  \
+    if (!(X))                                        \
+      jsAssertFail(__FILE__, __LINE__, __STRING(X)); \
+  } while (0)
 #else
- #define assert(X) do { } while(0)
+// Limited assert due to compiler not being able to stringify a parameter
+#define assert(X)                           \
+  do                                        \
+  {                                         \
+    if (!(X))                               \
+      jsAssertFail(__FILE__, __LINE__, ""); \
+  } while (0)
+#endif
+#else
+#define assert(X) \
+  do              \
+  {               \
+  } while (0)
 #endif
 
 /// Used when we have enums we want to squash down
-#define PACKED_FLAGS  __attribute__ ((__packed__))
+#define PACKED_FLAGS __attribute__((__packed__))
 
 /// Used before functions that we want to ensure are not inlined (eg. "void NO_INLINE foo() {}")
-#define NO_INLINE __attribute__ ((noinline))
+#define NO_INLINE __attribute__((noinline))
 
 /// Put before functions that we always want inlined
 #if defined(__GNUC__) && !defined(__clang__)
- #if defined(LINK_TIME_OPTIMISATION) && !defined(SAVE_ON_FLASH) && !defined(DEBUG)
-  #define ALWAYS_INLINE __attribute__ ((gnu_inline)) __attribute__((always_inline)) inline
- #else
-  #define ALWAYS_INLINE __attribute__ ((gnu_inline)) inline
- #endif
+#if defined(LINK_TIME_OPTIMISATION) && !defined(SAVE_ON_FLASH) && !defined(DEBUG)
+#define ALWAYS_INLINE __attribute__((gnu_inline)) __attribute__((always_inline)) inline
+#else
+#define ALWAYS_INLINE __attribute__((gnu_inline)) inline
+#endif
 #else
 // clang seems to hate being asked to inline when the definition
 // isn't in the same file
@@ -372,37 +385,38 @@ typedef int64_t JsSysTime;
 #endif
 
 /// Maximum amount of locks we ever expect to have on a variable (this could limit recursion) must be 2^n-1
-#define JSV_LOCK_MAX  15
+#define JSV_LOCK_MAX 15
 
 /// preprocessor power of 2 - suitable up to 16 bits
-#define NEXT_POWER_2(X) \
-   (((X) | (X)>>1 | (X)>>2 | (X)>>3 | \
-    (X)>>4 | (X)>>5 | (X)>>6 | (X)>>7 | \
-    (X)>>8 | (X)>>9 | (X)>>10 | (X)>>11 | \
-    (X)>>12 | (X)>>13 | (X)>>14 | (X)>>15)+1)
+#define NEXT_POWER_2(X)                              \
+  (((X) | (X) >> 1 | (X) >> 2 | (X) >> 3 |           \
+    (X) >> 4 | (X) >> 5 | (X) >> 6 | (X) >> 7 |      \
+    (X) >> 8 | (X) >> 9 | (X) >> 10 | (X) >> 11 |    \
+    (X) >> 12 | (X) >> 13 | (X) >> 14 | (X) >> 15) + \
+   1)
 /// Proprocessor get bit number
-#define GET_BIT_NUMBER(X) \
-  (((X)==    1)? 0: \
-   ((X)==    2)? 1: \
-   ((X)==    4)? 2: \
-   ((X)==    8)? 3: \
-   ((X)==   16)? 4: \
-   ((X)==   32)? 5: \
-   ((X)==   64)? 6: \
-   ((X)==  128)? 7: \
-   ((X)==  256)? 8: \
-   ((X)==  512)? 9: \
-   ((X)== 1024)?10: \
-   ((X)== 2048)?11: \
-   ((X)== 4096)?12: \
-   ((X)== 8192)?13: \
-   ((X)==16384)?14: \
-   ((X)==32768)?15:10000/*error*/)
+#define GET_BIT_NUMBER(X)             \
+  (((X) == 1) ? 0 : ((X) == 2)   ? 1  \
+                : ((X) == 4)     ? 2  \
+                : ((X) == 8)     ? 3  \
+                : ((X) == 16)    ? 4  \
+                : ((X) == 32)    ? 5  \
+                : ((X) == 64)    ? 6  \
+                : ((X) == 128)   ? 7  \
+                : ((X) == 256)   ? 8  \
+                : ((X) == 512)   ? 9  \
+                : ((X) == 1024)  ? 10 \
+                : ((X) == 2048)  ? 11 \
+                : ((X) == 4096)  ? 12 \
+                : ((X) == 8192)  ? 13 \
+                : ((X) == 16384) ? 14 \
+                : ((X) == 32768) ? 15 \
+                                 : 10000 /*error*/)
 
 // To handle variable size bit fields
-#define BITFIELD_DECL(BITFIELD, N) uint32_t BITFIELD[((N)+31)/32]
-#define BITFIELD_GET(BITFIELD, N) ((BITFIELD[(N)>>5] >> ((N)&31))&1)
-#define BITFIELD_SET(BITFIELD, N, VALUE) (BITFIELD[(N)>>5] = (BITFIELD[(N)>>5]& (uint32_t)~(1 << ((N)&31))) | (uint32_t)((VALUE)?(1 << ((N)&31)):0)  )
+#define BITFIELD_DECL(BITFIELD, N) uint32_t BITFIELD[((N) + 31) / 32]
+#define BITFIELD_GET(BITFIELD, N) ((BITFIELD[(N) >> 5] >> ((N)&31)) & 1)
+#define BITFIELD_SET(BITFIELD, N, VALUE) (BITFIELD[(N) >> 5] = (BITFIELD[(N) >> 5] & (uint32_t) ~(1 << ((N)&31))) | (uint32_t)((VALUE) ? (1 << ((N)&31)) : 0))
 #define BITFIELD_CLEAR(BITFIELD) memset(BITFIELD, 0, sizeof(BITFIELD)) ///< Clear all elements
 
 // Array of 4 bit values - returns unsigned
@@ -414,26 +428,29 @@ typedef int64_t JsSysTime;
 */
 
 #if defined(NRF51_SERIES)
-  // Cortex-M0 does not support unaligned reads
-  #define UNALIGNED_UINT16(addr) ((((uint16_t)*((uint8_t*)(addr)+1)) << 8) | (*(uint8_t*)(addr)))
+// Cortex-M0 does not support unaligned reads
+#define UNALIGNED_UINT16(addr) ((((uint16_t) * ((uint8_t *)(addr) + 1)) << 8) | (*(uint8_t *)(addr)))
 #else
-  #define UNALIGNED_UINT16(addr) (*(uint16_t*)addr)
+#define UNALIGNED_UINT16(addr) (*(uint16_t *)addr)
 #endif
 
 /* We define these for the lexer so we can definitely get it to inline the function call */
-static ALWAYS_INLINE bool isWhitespaceInline(char ch) {
-    return (ch==0x09) || // \t - tab
-           (ch==0x0B) || // vertical tab
-           (ch==0x0C) || // form feed
-           (ch==0x20) || // space
-           (ch=='\n') ||
-           (ch=='\r');
+static ALWAYS_INLINE bool isWhitespaceInline(char ch)
+{
+  return (ch == 0x09) || // \t - tab
+         (ch == 0x0B) || // vertical tab
+         (ch == 0x0C) || // form feed
+         (ch == 0x20) || // space
+         (ch == '\n') ||
+         (ch == '\r');
 }
-static ALWAYS_INLINE bool isAlphaInline(char ch) {
-    return ((ch>='a') && (ch<='z')) || ((ch>='A') && (ch<='Z')) || ch=='_';
+static ALWAYS_INLINE bool isAlphaInline(char ch)
+{
+  return ((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')) || ch == '_';
 }
-static ALWAYS_INLINE bool isNumericInline(char ch) {
-    return (ch>='0') && (ch<='9');
+static ALWAYS_INLINE bool isNumericInline(char ch)
+{
+  return (ch >= '0') && (ch <= '9');
 }
 
 bool isWhitespace(char ch);
@@ -458,10 +475,10 @@ int chtod(char ch);
 int hexToByte(char hi, char lo);
 /* convert a number in the given radix to an int */
 long long stringToIntWithRadix(const char *s,
-               int forceRadix, //!< if radix=0, autodetect
-               bool *hasError, //!< If nonzero, set to whether there was an error or not
-               const char **endOfInteger //!<  If nonzero, this is set to the point at which the integer finished in the string
-               );
+                               int forceRadix,           //!< if radix=0, autodetect
+                               bool *hasError,           //!< If nonzero, set to whether there was an error or not
+                               const char **endOfInteger //!<  If nonzero, this is set to the point at which the integer finished in the string
+);
 /* convert hex, binary, octal or decimal string into an int */
 long long stringToInt(const char *s);
 
@@ -481,10 +498,13 @@ void jsAssertFail(const char *file, int line, const char *expr);
    #define jsDebug(dbg_type, format, ...) do { } while(0)
  #endif
  */
-#if (defined DEBUG ) ||  ( defined __FILE__ == DEBUG_FILE)
-  #define jsDebug(dbg_type, format, ...) jsiConsolePrintf("[" __FILE__ "]:" format, ## __VA_ARGS__)
+#if (defined DEBUG) || (defined __FILE__ == DEBUG_FILE)
+#define jsDebug(dbg_type, format, ...) jsiConsolePrintf("[" __FILE__ "]:" format, ##__VA_ARGS__)
 #else
-  #define jsDebug(dbg_type, format, ...) do { } while(0)
+#define jsDebug(dbg_type, format, ...) \
+  do                                   \
+  {                                    \
+  } while (0)
 #endif
 
 #ifndef USE_FLASH_MEMORY
@@ -494,35 +514,42 @@ void jsError(const char *fmt, ...);
 void jsWarn(const char *fmt, ...);
 #else
 // Special jsError and jsWarn functions that place the format string into flash to save RAM
-#define jsExceptionHere(type, fmt, ...) do { \
-    FLASH_STR(flash_str, fmt); \
+#define jsExceptionHere(type, fmt, ...)                    \
+  do                                                       \
+  {                                                        \
+    FLASH_STR(flash_str, fmt);                             \
     jsExceptionHere_flash(type, flash_str, ##__VA_ARGS__); \
-  } while(0)
+  } while (0)
 void jsExceptionHere_flash(JsExceptionType type, const char *fmt, ...);
 
-#define jsError(fmt, ...) do { \
-    FLASH_STR(flash_str, fmt); \
+#define jsError(fmt, ...)                    \
+  do                                         \
+  {                                          \
+    FLASH_STR(flash_str, fmt);               \
     jsError_flash(flash_str, ##__VA_ARGS__); \
-  } while(0)
+  } while (0)
 void jsError_flash(const char *fmt, ...);
 
-#define jsWarn(fmt, ...) do { \
-    FLASH_STR(flash_str, fmt); \
+#define jsWarn(fmt, ...)                    \
+  do                                        \
+  {                                         \
+    FLASH_STR(flash_str, fmt);              \
     jsWarn_flash(flash_str, ##__VA_ARGS__); \
-  } while(0)
+  } while (0)
 void jsWarn_flash(const char *fmt, ...);
 #endif
 
 // ------------
 /// Error flags for internal errors - update jswrap_espruino_getErrorFlags if you add to this
-typedef enum {
+typedef enum
+{
   JSERR_NONE = 0,
-  JSERR_RX_FIFO_FULL = 1, ///< The IO buffer (ioBuffer in jsdevices.c) is full and data was lost. Happens for character data and watch events
-  JSERR_BUFFER_FULL = 2, ///< eg. Serial1's buffer exceeded the max size. Doesn't happen if you have an on('data') callback
-  JSERR_CALLBACK = 4, ///< A callback (on data/watch/timer) caused an error and was removed
-  JSERR_LOW_MEMORY = 8, ///< Memory is running low - Espruino had to run a garbage collection pass or remove some of the command history
-  JSERR_MEMORY = 16, ///< Espruino ran out of memory and was unable to allocate some data that it needed.
-  JSERR_MEMORY_BUSY = 32, ///< Espruino was busy doing something with memory (eg. garbage collection) so an IRQ couldn't allocate memory
+  JSERR_RX_FIFO_FULL = 1,   ///< The IO buffer (ioBuffer in jsdevices.c) is full and data was lost. Happens for character data and watch events
+  JSERR_BUFFER_FULL = 2,    ///< eg. Serial1's buffer exceeded the max size. Doesn't happen if you have an on('data') callback
+  JSERR_CALLBACK = 4,       ///< A callback (on data/watch/timer) caused an error and was removed
+  JSERR_LOW_MEMORY = 8,     ///< Memory is running low - Espruino had to run a garbage collection pass or remove some of the command history
+  JSERR_MEMORY = 16,        ///< Espruino ran out of memory and was unable to allocate some data that it needed.
+  JSERR_MEMORY_BUSY = 32,   ///< Espruino was busy doing something with memory (eg. garbage collection) so an IRQ couldn't allocate memory
   JSERR_UART_OVERFLOW = 64, ///< A UART received data but it was not read in time and was lost
 
   JSERR_WARNINGS_MASK = JSERR_LOW_MEMORY ///< Issues that are warnings, not actual problems
@@ -534,29 +561,29 @@ extern volatile JsErrorFlags jsErrorFlags;
 
 /** Convert a string to a JS float variable where the string is of a specific radix. */
 JsVarFloat stringToFloatWithRadix(
-    const char *s, //!< The string to be converted to a float
-    int forceRadix, //!< The radix of the string data, or 0 to guess
+    const char *s,          //!< The string to be converted to a float
+    int forceRadix,         //!< The radix of the string data, or 0 to guess
     const char **endOfFloat //!< If nonzero, this is set to the point at which the float finished in the string
-  );
+);
 
 /** convert a string to a floating point JS variable. */
 JsVarFloat stringToFloat(const char *str);
 
-void itostr_extra(JsVarInt vals,char *str,bool signedVal,unsigned int base); // like itoa, but uses JsVarInt (good on non-32 bit systems)
-static ALWAYS_INLINE void itostr(JsVarInt val,char *str,unsigned int base) {
-    itostr_extra(val, str, true, base);
+void itostr_extra(JsVarInt vals, char *str, bool signedVal, unsigned int base); // like itoa, but uses JsVarInt (good on non-32 bit systems)
+static ALWAYS_INLINE void itostr(JsVarInt val, char *str, unsigned int base)
+{
+  itostr_extra(val, str, true, base);
 }
 
 char itoch(int val);
 
 // super ftoa that does fixed point and radix
-void ftoa_bounded_extra(JsVarFloat val,char *str, size_t len, int radix, int fractionalDigits);
+void ftoa_bounded_extra(JsVarFloat val, char *str, size_t len, int radix, int fractionalDigits);
 // normal ftoa with bounds checking
-void ftoa_bounded(JsVarFloat val,char *str, size_t len);
+void ftoa_bounded(JsVarFloat val, char *str, size_t len);
 
 /// Wrap a value so it is always between 0 and size (eg. wrapAround(angle, 360))
 JsVarFloat wrapAround(JsVarFloat val, JsVarFloat size);
-
 
 typedef void (*vcbprintf_callback)(const char *str, void *user_data);
 /**
@@ -586,12 +613,12 @@ void vcbprintf(vcbprintf_callback user_callback, void *user_data, const char *fm
 void cbprintf(vcbprintf_callback user_callback, void *user_data, const char *fmt, ...);
 
 /// a snprintf replacement so mbedtls doesn't try and pull in the whole stdlib to cat two strings together
-int espruino_snprintf_va( char * s, size_t n, const char * fmt, va_list argp );
+int espruino_snprintf_va(char *s, size_t n, const char *fmt, va_list argp);
 
 /// a snprintf replacement so mbedtls doesn't try and pull in the whole stdlib to cat two strings together
-int espruino_snprintf( char * s, size_t n, const char * fmt, ... );
+int espruino_snprintf(char *s, size_t n, const char *fmt, ...);
 
-//#define RAND_MAX (0x7FFFFFFFU) // needs to be unsigned!
+// #define RAND_MAX (0x7FFFFFFFU) // needs to be unsigned!
 
 /// a rand() replacement that doesn't need malloc (!!!)
 int rand();
@@ -614,11 +641,12 @@ unsigned short int int_sqrt32(unsigned int x);
 size_t jsuGetFreeStack();
 
 #ifdef ESP32
-  void *espruino_stackHighPtr;  //Used by jsuGetFreeStack
+void *espruino_stackHighPtr; // Used by jsuGetFreeStack
 #endif
 
-typedef struct {
-  short x,y,z;
+typedef struct
+{
+  short x, y, z;
 } Vector3;
 
 #ifdef ESPR_UNICODE_SUPPORT
@@ -632,13 +660,15 @@ unsigned int jsUTF8LengthFromChar(char c);
 unsigned int jsUTF8Bytes(int codepoint);
 
 // encode a codepoint as a string, NOT null terminated (utf8 min size=4)
-unsigned int jsUTF8Encode(int codepoint, char* utf8);
+unsigned int jsUTF8Encode(int codepoint, char *utf8);
 
-static ALWAYS_INLINE bool jsUnicodeIsHighSurrogate(int codepoint) {
+static ALWAYS_INLINE bool jsUnicodeIsHighSurrogate(int codepoint)
+{
   return ((codepoint & 0xFC00) == 0xD800);
 }
 
-static ALWAYS_INLINE bool jsUnicodeIsLowSurrogate(int codepoint) {
+static ALWAYS_INLINE bool jsUnicodeIsLowSurrogate(int codepoint)
+{
   return ((codepoint & 0xFC00) == 0xDC00);
 }
 #endif // ESPR_UNICODE_SUPPORT
