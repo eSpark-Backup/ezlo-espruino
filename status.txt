@@ -1,1 +1,1 @@
-I am working on porting espruino functions, which are generated during the make process. The buildwrapper.py is responsible for generating source files for specific boards, I am working on understanding the buildwrapper.py to get those generated source files or make mine for esp32
+Working on reducing Memory usage and understand make compilation how it is minimizing ram utilization
