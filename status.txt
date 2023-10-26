@@ -1,1 +1,2 @@
-Working on reducing Memory usage and understand make compilation how it is minimizing ram utilization
+I am working on reducing memory usage in Jsvar as it is consuming 223Kb, There is no direct global variables and also not much malloc allocation that i can change to heap allocation.
+According to script reading my assumption is issue with Macros being set by default, so i need to set Macros properly
