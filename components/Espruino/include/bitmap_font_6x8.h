@@ -13,6 +13,7 @@
  */
 
 #include "graphics.h"
+#include "DeviceConfig.h"
 
 #ifdef USE_FONT_6X8
 void graphicsDrawChar6x8(JsGraphics *gfx, int x1, int y1, char ch, unsigned short sizex, unsigned short sizey, bool solidBackground);
