@@ -159,17 +159,17 @@ static void main_task(void *pv)
 
 void app_main(void)
 {
-    gpio_install_isr_service(0);
-    qt_serial_init();
-    factory_info_init();
-    nvs_storage_init();
-    devices_common_init_devices();
-    interface_common_init();
-    switch_service_init();
-    GATT_SERVER_MAIN();
+    // gpio_install_isr_service(0);
+    // qt_serial_init();
+    // factory_info_init();
+    // nvs_storage_init();
+    // devices_common_init_devices();
+    // interface_common_init();
+    // switch_service_init();
+    // GATT_SERVER_MAIN();
 
-    wifi_initialize();
-    wifi_connect_from_nvs();
+    // wifi_initialize();
+    // wifi_connect_from_nvs();
 
     esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
     esp_err_t err = nvs_flash_init();
@@ -211,7 +211,7 @@ void app_main(void)
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, NULL, 0);
 #endif
 
-    xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, NULL);
+    // xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, NULL);
     // xTaskCreate(blinky, "blinky", 2048, NULL, 1, NULL);
 }
 
