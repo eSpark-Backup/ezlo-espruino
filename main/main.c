@@ -23,8 +23,14 @@
 #include "gatt_server.h"
 #include "dht.h"
 #include "mpu6050.h"
+#include "esp_task_wdt.h"
 
 #include "wss.h"
+
+/*********************************** MACROS DEFINATION ********************************/
+#define TWDT_TIMEOUT_MS 30000
+#define TASK_RESET_PERIOD_MS 2000
+#define MAIN_DELAY_MS 10000
 
 /******************** Espruino Js ***********************/
 #include "jsdevices.h"
@@ -53,6 +59,9 @@
 
 #include "jsvar.h"
 
+TaskHandle_t EspruinoTask;
+TaskHandle_t UartTask;
+
 extern void *espruino_stackHighPtr; // Name spaced because this has to be a global variable.
                                     // Used in jsuGetFreeStack().
 
@@ -60,6 +69,8 @@ extern void initialise_wifi(void);
 
 static void uartTask(void *data)
 {
+    ESP_ERROR_CHECK(esp_task_wdt_add(uartTask));
+    ESP_ERROR_CHECK(esp_task_wdt_status(uartTask));
     initConsole();
     while (1)
     {
@@ -106,8 +117,13 @@ static void espruinoTask(void *data)
 #ifdef BLUETOOTH
     bluetooth_initDeviceName();
 #endif
+
+    ESP_ERROR_CHECK(esp_task_wdt_add(EspruinoTask));
+    ESP_ERROR_CHECK(esp_task_wdt_status(EspruinoTask));
     while (1)
     {
+        // Reset the task and each user periodically
+        esp_task_wdt_reset();
         jsiLoop(); // Perform the primary loop processing
         gatts_sendNUSNotificationIfNotEmpty();
     }
@@ -159,6 +175,12 @@ static void main_task(void *pv)
 
 void app_main(void)
 {
+
+#if !CONFIG_ESP_TASK_WDT_INIT
+    // If the TWDT was not initialized automatically on startup, manually intialize it now
+    ESP_ERROR_CHECK(esp_task_wdt_init(TWDT_TIMEOUT_MS, false));
+    printf("TWDT initialized\n");
+#endif
     // gpio_install_isr_service(0);
     // qt_serial_init();
     // factory_info_init();
@@ -207,8 +229,8 @@ void app_main(void)
     task_init(espruinoTask, "EspruinoTask", ESP_STACK_SIZE, 5, 0);
     task_init(uartTask, "ConsoleTask", 2200, 20, 0);
 #else
-    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", ESP_STACK_SIZE, NULL, 5, NULL, 0);
-    xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, NULL, 0);
+    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", ESP_STACK_SIZE, NULL, 5, &EspruinoTask, 0);
+    xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, &UartTask, 0);
 #endif
 
     // xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, NULL);
