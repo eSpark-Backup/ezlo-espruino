@@ -19,8 +19,6 @@
 #include "jsvar.h"
 #include "DeviceConfig.h"
 
-#define BLUETOOTH
-
 /** Initialize any device-specific structures, like flow control states.
  * Called from jshInit */
 void jshInitDevices();
@@ -166,8 +164,8 @@ typedef enum
 #define IOEVENTFLAGS_SERIAL_STATUS_TO_SERIAL(X) ((X) + EV_SERIAL1 - EV_SERIAL1_STATUS)
 #endif
 
-#define IOEVENTFLAGS_GETTYPE(X) ((X)&EV_TYPE_MASK)
-#define IOEVENTFLAGS_GETCHARS(X) ((((X)&EV_CHARS_MASK) >> EV_CHARS_SHIFT) + 1)
+#define IOEVENTFLAGS_GETTYPE(X) ((X) & EV_TYPE_MASK)
+#define IOEVENTFLAGS_GETCHARS(X) ((((X) & EV_CHARS_MASK) >> EV_CHARS_SHIFT) + 1)
 #define IOEVENTFLAGS_SETCHARS(X, CHARS) ((X) = (((X) & (IOEventFlags)~EV_CHARS_MASK) | (((CHARS)-1) << EV_CHARS_SHIFT)))
 #define IOEVENT_MAXCHARS 4 // See EV_CHARS_MASK
 

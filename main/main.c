@@ -193,7 +193,7 @@ void app_main(void)
     // wifi_initialize();
     // wifi_connect_from_nvs();
 
-    esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
+    // esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {

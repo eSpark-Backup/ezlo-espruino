@@ -15,9 +15,13 @@
 #define GAP_FUNC_H_
 
 #include "DeviceConfig.h"
+#if BLUETOOTH == 1
 #include "esp_gap_ble_api.h"
+#endif
 #include "jsvar.h"
+#if BLUETOOTH == 1
 #include "bluetooth.h"
+#endif
 
 #define BLE_DEVICE_NAME "BLE_DEV_N"
 

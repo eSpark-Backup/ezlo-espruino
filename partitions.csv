@@ -1,13 +1,11 @@
-# ESP32 Partition Table,,,,,
-# Name,         Type,     SubType,    Offset,    Size,       Flags
-nvs,            data,     nvs,        0x9000,12K,
-otadata,        data,     ota,        0xc000,8K,
-free,data,0x40,0xE000,8K,
-phy_init,       data,     phy,        0x10000,    0x1000,
-ota0,           app,      ota_0,0x20000,   0x1C0000,
-opt,            data,     spiffs,            ,   0x10000,
-nvs_ext,        data,     nvs,               ,   0x10000,
-flash,data,0x40,,64K,
-js_code,data,0x41,,256K,
-storage,data,0x42,,640K,
-id,             0x40,0,,   0x10000,
+#Name,Type,SubType,Offset,Size
+#boot,data,0,0x1000,4K
+#reserved,0,0,0x2000,24K
+#partition,data,0,0x8000,4K
+nvs,data,nvs,0x9000,12K
+otadata,data,ota,0xC000,8K
+free,data,0x40,0xE000,8K
+factory,app,factory,0x10000,   0x1C0000
+flash,data,0x40,0x310000,64K
+js_code,data,,0x320000,256K
+storage,data,,0x360000,640K

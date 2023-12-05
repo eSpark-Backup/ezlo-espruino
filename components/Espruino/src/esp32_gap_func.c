@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "esp_wifi.h"
+
 #include "esp32_gap_func.h"
 #include "esp32_gatts_func.h"
 #include "esp32_bluetooth_utils.h"

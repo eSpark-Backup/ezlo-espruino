@@ -12,6 +12,7 @@
     "string.h": "c",
     "stdio.h": "c",
     "deviceconfig.h": "c",
-    "jswrap_neopixel.h": "c"
+    "jswrap_neopixel.h": "c",
+    "bluetooth.h": "c"
   }
 }
