@@ -20,7 +20,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "esp_log.h"
-
+#include "esp_debug_helpers.h"
 static char *ESP32_hardwareName(esp_hardware_esp32_t hardware)
 {
   switch (hardware)
@@ -40,13 +40,14 @@ bool ESP32_Get_NVS_Status(esp_hardware_esp32_t hardware)
   uint32_t status;
   nvs_open("nvs", NVS_READWRITE, &hardwareHandle);
   err = nvs_get_u32(hardwareHandle, ESP32_hardwareName(hardware), &status);
-  ESP_LOGW("Hardware", "Checking NVS");
+
   if (err)
   {
     status = ESP32HARDWAREDEFAULT;
     nvs_set_u32(hardwareHandle, ESP32_hardwareName(hardware), ESP32HARDWAREDEFAULT);
   }
   nvs_close(hardwareHandle);
+  // ESP_LOGW("Hardware", "Checking NVS %s returns %d", ESP32_hardwareName(hardware), (bool)status);
   return (bool)status;
 }
 

@@ -32,6 +32,8 @@
 #include "jswrap_bluetooth.h"
 #endif
 
+#include "esp_log.h"
+
 #ifdef ARM
 #define CHAR_DELETE_SEND 0x08
 #else
@@ -2695,8 +2697,11 @@ void jsiIdle()
       // shut down everything and start up again
       jsiKill();
       jsvKill();
+      ESP_LOGI("JsInteractive", "jshIdle 1");
       jshReset();
+      ESP_LOGI("JsInteractive", "jsvInit enter Old VarSIZE %d", oldJsVarsSize);
       jsvInit(oldJsVarsSize);
+      ESP_LOGI("JsInteractive", "jsvInit exit");
       jsiSemiInit(false, NULL /* no filename */); // don't autoload
       jsiStatus &= (JsiStatus)~JSIS_TODO_RESET;
     }
@@ -2707,6 +2712,7 @@ void jsiIdle()
       jspSoftKill();
       jsvSoftKill();
       jsfSaveToFlash();
+      ESP_LOGI("JsInteractive", "jshIdle 2");
       jshReset();
       jsvSoftInit();
       jspSoftInit();
@@ -2724,6 +2730,7 @@ void jsiIdle()
         // go through steps as if we're resetting
         jsiKill();
         jsvKill();
+        ESP_LOGI("JsInteractive", "jshIdle 3");
         jshReset();
         jsvInit(oldJsVarsSize);
         jsiSemiInit(false, &filename); // don't autoload code
@@ -2738,6 +2745,7 @@ void jsiIdle()
         jspSoftKill();
         jsvSoftKill();
         jsvKill();
+        ESP_LOGI("JsInteractive", "jshIdle 4");
         jshReset();
         jsvInit(oldJsVarsSize);
         jsfLoadStateFromFlash();

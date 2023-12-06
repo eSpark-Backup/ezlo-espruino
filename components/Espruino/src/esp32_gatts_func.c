@@ -796,8 +796,10 @@ void gatts_set_services(JsVar *data)
 }
 void gatts_reset(bool removeValues)
 {
+  ESP_LOGW("esp32_gatts_func", "gatts_reset");
   esp_err_t r;
   _removeValues = removeValues;
+  ESP_LOGW("esp32_gatts_func", "Service Count %d", ble_service_cnt);
   if (ble_service_cnt > 0)
   {
     for (int i = 0; i < ble_service_cnt; i++)

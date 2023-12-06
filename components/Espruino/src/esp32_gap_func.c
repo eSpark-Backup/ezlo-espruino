@@ -27,6 +27,8 @@
 #include "jshardwareESP32.h"
 #include "bluetooth_utils.h"
 
+#include "esp_log.h"
+
 #define adv_config_flag (1 << 0)
 #define scan_rsp_config_flag (1 << 1)
 #define BT_BD_ADDR_HEX(addr) addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
@@ -187,6 +189,7 @@ void bluetooth_gap_setScan(bool enable, bool activeScan)
 
 esp_err_t bluetooth_gap_startAdvertising(bool enable)
 {
+  ESP_LOGI("esp32_gap_func", "bluetooth_gap_startAdvertising");
   if (!ESP32_Get_NVS_Status(ESP_NETWORK_BLE))
     return ESP_ERR_INVALID_STATE; // ESP32.enableBLE(false)
   if (enable)
@@ -330,6 +333,7 @@ uint32_t jsble_advertising_update_scanresponse(char *dPtr, unsigned int dLen)
 
 esp_err_t bluetooth_gap_setAdvertising(JsVar *advArray)
 {
+  ESP_LOGI("esp32_gap_func", "bluetooth_gap_setAdvertising");
   if (!ESP32_Get_NVS_Status(ESP_NETWORK_BLE))
     return 0; // ESP32.enableBLE(false) - we return 0 here so we don't output an error message at boot
   esp_err_t ret;

@@ -13,6 +13,7 @@
     "stdio.h": "c",
     "deviceconfig.h": "c",
     "jswrap_neopixel.h": "c",
-    "bluetooth.h": "c"
+    "bluetooth.h": "c",
+    "jsinteractive.h": "c"
   }
 }

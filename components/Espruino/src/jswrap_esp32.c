@@ -35,6 +35,7 @@
 #include "jsutils.h"
 #include "jsinteractive.h"
 #include "jsparse.h"
+#include "esp_log.h"
 
 /*JSON{
   "type": "class",
@@ -56,8 +57,9 @@ Class containing utility functions for the
    ["atten", "int", "Attenuate factor"]
  ]
 }*/
-void jswrap_ESP32_setAtten(Pin pin,int atten){
-  printf("Atten:%d\n",atten);
+void jswrap_ESP32_setAtten(Pin pin, int atten)
+{
+  printf("Atten:%d\n", atten);
   rangeADC(pin, atten);
 }
 
@@ -70,10 +72,10 @@ void jswrap_ESP32_setAtten(Pin pin,int atten){
 }
 Perform a hardware reset/reboot of the ESP32.
 */
-void jswrap_ESP32_reboot() {
+void jswrap_ESP32_reboot()
+{
   jshReboot();
 } // End of jswrap_ESP32_reboot
-
 
 /*JSON{
   "type"     : "staticmethod",
@@ -85,7 +87,8 @@ void jswrap_ESP32_reboot() {
 }
 Put device in deepsleep state for "us" microseconds.
 */
-void jswrap_ESP32_deepSleep(int us) {
+void jswrap_ESP32_deepSleep(int us)
+{
   esp_sleep_enable_timer_wakeup((uint64_t)(us));
   esp_deep_sleep_start(); // This function does not return.
 } // End of jswrap_ESP32_deepSleep
@@ -105,8 +108,10 @@ Put device in deepsleep state until interrupted by pin "pin".
 Eligible pin numbers are restricted to those [GPIOs designated
 as RTC GPIOs](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/gpio.html#gpio-summary).
 */
-void jswrap_ESP32_deepSleep_ext0(Pin pin, int level) {
-  if (!rtc_gpio_is_valid_gpio(pin)) {
+void jswrap_ESP32_deepSleep_ext0(Pin pin, int level)
+{
+  if (!rtc_gpio_is_valid_gpio(pin))
+  {
     jsExceptionHere(JSET_ERROR, "Invalid pin!");
     return;
   }
@@ -135,35 +140,43 @@ Valid modes are:
 Eligible pin numbers are restricted to those [GPIOs designated
 as RTC GPIOs](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/gpio.html#gpio-summary).
 */
-void jswrap_ESP32_deepSleep_ext1(JsVar *pinVar, JsVarInt mode) {
+void jswrap_ESP32_deepSleep_ext1(JsVar *pinVar, JsVarInt mode)
+{
   uint64_t pinSum = 0;
-  if (jsvIsArray(pinVar)) {
+  if (jsvIsArray(pinVar))
+  {
     JsvIterator it;
     jsvIteratorNew(&it, pinVar, JSIF_DEFINED_ARRAY_ElEMENTS);
-    while (jsvIteratorHasElement(&it)) {
+    while (jsvIteratorHasElement(&it))
+    {
       Pin pin = jshGetPinFromVarAndUnLock(jsvIteratorGetValue(&it));
-      if (!rtc_gpio_is_valid_gpio(pin)) {
+      if (!rtc_gpio_is_valid_gpio(pin))
+      {
         jsvIteratorFree(&it);
         jsExceptionHere(JSET_ERROR, "Invalid pin (%d)!", pin);
         return;
       }
-      pinSum += 1<<pin;
+      pinSum += 1 << pin;
 
       jsvIteratorNext(&it);
     }
     jsvIteratorFree(&it);
-  } else {
+  }
+  else
+  {
     // We really expected an array of pins but
     // handle case of a single pin anyway
     Pin pin = jshGetPinFromVar(pinVar);
-    if (!rtc_gpio_is_valid_gpio(pin)) {
+    if (!rtc_gpio_is_valid_gpio(pin))
+    {
       jsExceptionHere(JSET_ERROR, "Invalid pin (%d)!", pin);
       return;
     }
-    pinSum = 1<<pin;
+    pinSum = 1 << pin;
   }
 
-  if ((mode < 0) || (mode > 1)) {
+  if ((mode < 0) || (mode > 1))
+  {
     jsExceptionHere(JSET_ERROR, "Invalid mode (%d)!", mode);
     return;
   }
@@ -191,10 +204,10 @@ Possible causes include:
 * `6: ESP_SLEEP_WAKEUP_ULP` - Wakeup caused by ULP program
 
 */
-int jswrap_ESP32_getWakeupCause() {
+int jswrap_ESP32_getWakeupCause()
+{
   return esp_sleep_get_wakeup_cause();
 } // End of jswrap_ESP32_getWakeupCause
-
 
 /*JSON{
   "type"     : "staticmethod",
@@ -214,15 +227,17 @@ following fields:
 * `minHeap` - Minimum heap, calculated by heap_caps_get_minimum_free_size
 
 */
-JsVar *jswrap_ESP32_getState() {
+JsVar *jswrap_ESP32_getState()
+{
   // Create a new variable and populate it with the properties of the ESP32 that we
   // wish to return.
   JsVar *esp32State = jsvNewObject();
-  jsvObjectSetChildAndUnLock(esp32State, "sdkVersion",   jsvNewFromString(esp_get_idf_version()));
-  jsvObjectSetChildAndUnLock(esp32State, "freeHeap",     jsvNewFromInteger(esp_get_free_heap_size()));
-  jsvObjectSetChildAndUnLock(esp32State, "BLE",          jsvNewFromBool(ESP32_Get_NVS_Status(ESP_NETWORK_BLE)));
-  jsvObjectSetChildAndUnLock(esp32State, "Wifi",         jsvNewFromBool(ESP32_Get_NVS_Status(ESP_NETWORK_WIFI)));  
-  jsvObjectSetChildAndUnLock(esp32State, "minHeap",      jsvNewFromInteger(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)));
+  jsvObjectSetChildAndUnLock(esp32State, "sdkVersion", jsvNewFromString(esp_get_idf_version()));
+  jsvObjectSetChildAndUnLock(esp32State, "freeHeap", jsvNewFromInteger(esp_get_free_heap_size()));
+  ESP_LOGI("JsVar", "jswrap_ESP32_getState");
+  jsvObjectSetChildAndUnLock(esp32State, "BLE", jsvNewFromBool(ESP32_Get_NVS_Status(ESP_NETWORK_BLE)));
+  jsvObjectSetChildAndUnLock(esp32State, "Wifi", jsvNewFromBool(ESP32_Get_NVS_Status(ESP_NETWORK_WIFI)));
+  jsvObjectSetChildAndUnLock(esp32State, "minHeap", jsvNewFromInteger(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)));
   return esp32State;
 } // End of jswrap_ESP32_getState
 
@@ -239,7 +254,8 @@ JsVar *jswrap_ESP32_getState() {
  "ifdef"  : "BLUETOOTH"
 }
 */
-void jswrap_ESP32_setBLE_Debug(int level){
+void jswrap_ESP32_setBLE_Debug(int level)
+{
   ESP32_setBLE_Debug(level);
 }
 
@@ -252,13 +268,14 @@ void jswrap_ESP32_setBLE_Debug(int level){
  "params"  : [
    ["enable", "bool", "switches Bluetooth on or off" ]
  ],
- "ifdef"  : "BLUETOOTH" 
+ "ifdef"  : "BLUETOOTH"
 }
 Switches Bluetooth off/on, removes saved code from Flash, resets the board, and
 on restart creates jsVars depending on available heap (actual additional 1800)
 */
-void jswrap_ESP32_enableBLE(bool enable) { //may be later, we will support BLEenable(ALL/SERVER/CLIENT)
-  ESP32_Set_NVS_Status(ESP_NETWORK_BLE,enable);
+void jswrap_ESP32_enableBLE(bool enable)
+{ // may be later, we will support BLEenable(ALL/SERVER/CLIENT)
+  ESP32_Set_NVS_Status(ESP_NETWORK_BLE, enable);
   jsfRemoveCodeFromFlash();
   esp_restart();
 }
@@ -271,13 +288,14 @@ void jswrap_ESP32_enableBLE(bool enable) { //may be later, we will support BLEen
  "generate"  : "jswrap_ESP32_enableWifi",
  "params"  : [
    ["enable", "bool", "switches Wifi on or off" ]
- ] 
+ ]
 }
 Switches Wifi off/on, removes saved code from Flash, resets the board, and on
 restart creates jsVars depending on available heap (actual additional 3900)
 */
-void jswrap_ESP32_enableWifi(bool enable) { //may be later, we will support BLEenable(ALL/SERVER/CLIENT)
-  ESP32_Set_NVS_Status(ESP_NETWORK_WIFI,enable);
+void jswrap_ESP32_enableWifi(bool enable)
+{ // may be later, we will support BLEenable(ALL/SERVER/CLIENT)
+  ESP32_Set_NVS_Status(ESP_NETWORK_WIFI, enable);
   jsfRemoveCodeFromFlash();
   esp_restart();
 }
@@ -302,8 +320,10 @@ If this is the case, you can use this function to mark the currently running ver
  * If set as invalid (false) Espruino will mark itself as not working properly and will reboot. The ESP32 bootloader
  will then start and will load any other partition it can find that is marked as ok.
 */
-void jswrap_ESP32_setOTAValid(bool isValid) {
-  if (isValid) esp_ota_mark_app_valid_cancel_rollback();
-  else esp_ota_mark_app_invalid_rollback_and_reboot();
+void jswrap_ESP32_setOTAValid(bool isValid)
+{
+  if (isValid)
+    esp_ota_mark_app_valid_cancel_rollback();
+  else
+    esp_ota_mark_app_invalid_rollback_and_reboot();
 }
-
