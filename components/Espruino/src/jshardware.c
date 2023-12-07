@@ -409,7 +409,9 @@ JshPinFunction jshPinAnalogOutput(Pin pin,
   {
     if (flags & (JSAOF_ALLOW_SOFTWARE | JSAOF_FORCE_SOFTWARE))
       jsError("pin does not support software PWM");
+#ifndef CONFIG_IDF_TARGET_ESP32S3
     writeDAC(pin, (uint8_t)(value * 256));
+#endif
   }
   else
   {
@@ -444,10 +446,14 @@ void jshSetOutputValue(JshPinFunction func, int value)
     switch (func & JSH_MASK_INFO)
     {
     case JSH_DAC_CH1:
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       writeDAC(25, val);
+#endif
       break;
     case JSH_DAC_CH2:
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       writeDAC(26, val);
+#endif
       break;
     }
   }
@@ -685,8 +691,12 @@ bool jshIsDeviceInitialised(IOEventFlags device)
 // the esp32 temperature sensor - undocumented library function call. Unsure of values returned.
 JsVarFloat jshReadTemperature()
 {
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   extern uint8_t temprature_sens_read();
   return temprature_sens_read();
+#else
+  return 0.0;
+#endif
 }
 
 // the esp8266 can read the VRef but then there's no analog input, so we don't support this

@@ -106,7 +106,7 @@ static void espruinoTask(void *data)
             heapVars = maxVars;
         }
     }
-
+    ESP_LOGI("Heap", "HeapVars Size %d", heapVars);
     jsvInit(heapVars); // Initialize the variables
 
     // not sure why this delay is needed?
@@ -229,7 +229,7 @@ void app_main(void)
     task_init(espruinoTask, "EspruinoTask", ESP_STACK_SIZE, 5, 0);
     task_init(uartTask, "ConsoleTask", 2200, 20, 0);
 #else
-    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", ESP_STACK_SIZE, NULL, 5, &EspruinoTask, 0);
+    xTaskCreatePinnedToCore(&espruinoTask, "espruinoTask", 10000, NULL, 5, &EspruinoTask, 0);
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, &UartTask, 0);
 #endif
 

@@ -10,74 +10,73 @@
 //!
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
-//! 
-//! Redistribution and use in source and binary forms, with or without 
-//! modification, are permitted provided that the following conditions 
-//! are met: 
-//! 
-//!     * Redistributions of source code must retain the above copyright 
-//! notice, this list of conditions and the following disclaimer. 
+//!
+//! Redistribution and use in source and binary forms, with or without
+//! modification, are permitted provided that the following conditions
+//! are met:
+//!
+//!     * Redistributions of source code must retain the above copyright
+//! notice, this list of conditions and the following disclaimer.
 //!     * Redistributions in binary form must reproduce the above copyright
 //! notice, this list of conditions and the following disclaimer in the
-//! documentation and/or other materials provided with the distribution. 
-//!     * Neither the name of the <ORGANIZATION> nor the names of its 
-//! contributors may be used to endorse or promote products derived 
-//! from this software without specific prior written permission. 
-//! 
+//! documentation and/or other materials provided with the distribution.
+//!     * Neither the name of the <ORGANIZATION> nor the names of its
+//! contributors may be used to endorse or promote products derived
+//! from this software without specific prior written permission.
+//!
 //! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 //! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //! THE POSSIBILITY OF SUCH DAMAGE.
 //
 //*****************************************************************************
 
-#ifndef	_W5100_H_
-#define	_W5100_H_
+#ifndef _W5100_H_
+#define _W5100_H_
 #include <stdint.h>
 #include "wizchip_conf.h"
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 /// \cond DOXY_APPLY_CODE
-#if   (_WIZCHIP_ == 5100)
+#if (_WIZCHIP_ == 5100)
 /// \endcond
 
-#define _WIZCHIP_SN_BASE_  (0x0400)
-#define _WIZCHIP_SN_SIZE_  (0x0100)
+#define _WIZCHIP_SN_BASE_ (0x0400)
+#define _WIZCHIP_SN_SIZE_ (0x0100)
 #define _WIZCHIP_IO_TXBUF_ (0x4000) /* Internal Tx buffer address of the iinchip */
 #define _WIZCHIP_IO_RXBUF_ (0x6000) /* Internal Rx buffer address of the iinchip */
 
+#define WIZCHIP_CREG_BLOCK 0x00											  ///< Common register block
+#define WIZCHIP_SREG_BLOCK(N) (_WIZCHIP_SN_BASE_ + _WIZCHIP_SN_SIZE_ * N) ///< Socket N register block
 
-#define WIZCHIP_CREG_BLOCK      	      0x00   ///< Common register block
-#define WIZCHIP_SREG_BLOCK(N)    	   (_WIZCHIP_SN_BASE_+ _WIZCHIP_SN_SIZE_*N) ///< Socket N register block
-
-#define WIZCHIP_OFFSET_INC(ADDR, N)    (ADDR + N) ///< Increase offset address
+#define WIZCHIP_OFFSET_INC(ADDR, N) (ADDR + N) ///< Increase offset address
 
 #if (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_)
-   #define _W5100_IO_BASE_     _WIZCHIP_IO_BASE_
+#define _W5100_IO_BASE_ _WIZCHIP_IO_BASE_
 #elif (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_)
-	#define IDM_OR             ((_WIZCHIP_IO_BASE  + 0x0000))
-	#define IDM_AR0            ((_WIZCHIP_IO_BASE_ + 0x0001))
-	#define IDM_AR1            ((_WIZCHIP_IO_BASE_ + 0x0002))
-	#define IDM_DR             ((_WIZCHIP_IO_BASE_ + 0x0003))
-	#define _W5100_IO_BASE_    0x0000
+#define IDM_OR ((_WIZCHIP_IO_BASE + 0x0000))
+#define IDM_AR0 ((_WIZCHIP_IO_BASE_ + 0x0001))
+#define IDM_AR1 ((_WIZCHIP_IO_BASE_ + 0x0002))
+#define IDM_DR ((_WIZCHIP_IO_BASE_ + 0x0003))
+#define _W5100_IO_BASE_ 0x0000
 #elif (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
-   #define _W5100_IO_BASE_    0x0000
+#define _W5100_IO_BASE_ 0x0000
 #endif
 
 ///////////////////////////////////////
 // Definition For Legacy Chip Driver //
 ///////////////////////////////////////
-#define IINCHIP_READ(ADDR)                WIZCHIP_READ(ADDR)               ///< The defined for legacy chip driver
-#define IINCHIP_WRITE(ADDR,VAL)           WIZCHIP_WRITE(ADDR,VAL)          ///< The defined for legacy chip driver
-#define IINCHIP_READ_BUF(ADDR,BUF,LEN)    WIZCHIP_READ_BUF(ADDR,BUF,LEN)   ///< The defined for legacy chip driver
-#define IINCHIP_WRITE_BUF(ADDR,BUF,LEN)   WIZCHIP_WRITE(ADDR,BUF,LEN)      ///< The defined for legacy chip driver
-
+#define IINCHIP_READ(ADDR) WIZCHIP_READ(ADDR)							  ///< The defined for legacy chip driver
+#define IINCHIP_WRITE(ADDR, VAL) WIZCHIP_WRITE(ADDR, VAL)				  ///< The defined for legacy chip driver
+#define IINCHIP_READ_BUF(ADDR, BUF, LEN) WIZCHIP_READ_BUF(ADDR, BUF, LEN) ///< The defined for legacy chip driver
+#define IINCHIP_WRITE_BUF(ADDR, BUF, LEN) WIZCHIP_WRITE(ADDR, BUF, LEN)	  ///< The defined for legacy chip driver
 
 //-----------    defgroup --------------------------------
 
@@ -88,8 +87,8 @@
  * - @ref WIZCHIP_register_W5100 : @ref Common_register_group_W5100 and @ref Socket_register_group_W5100
  * - @ref WIZCHIP_IO_Functions_W5100 : @ref Basic_IO_function_W5100, @ref Common_register_access_function_W5100 and @ref Socket_register_group_W5100
  */
- 
- /**
+
+/**
  * @defgroup WIZCHIP_register_W5100 WIZCHIP register
  * @ingroup W5100
  * @brief WIZCHIP register defines register group of <b> W5100 </b>.
@@ -97,11 +96,10 @@
  * - \ref Common_register_group_W5100 : Common register group W5100
  * - \ref Socket_register_group_W5100 : \c SOCKET n register group W5100
  */
- 
 
 /**
  * @defgroup WIZCHIP_IO_Functions_W5100 WIZCHIP I/O functions
- * @ingroup W5100 
+ * @ingroup W5100
  * @brief This supports the basic I/O functions for \ref WIZCHIP_register_W5100.
  *
  * - <b> Basic I/O function </b> \n
@@ -111,7 +109,7 @@
  * 	-# @b Mode \n
  *    getMR(), setMR()
  * 	-# @b Interrupt \n
- *    getIR(), setIR(), getIMR(), setIMR(), 
+ *    getIR(), setIR(), getIMR(), setIMR(),
  * 	-# <b> Network Information </b> \n
  *    getSHAR(), setSHAR(), getGAR(), setGAR(), getSUBR(), setSUBR(), getSIPR(), setSIPR()
  * 	-# @b Retransmission \n
@@ -134,7 +132,7 @@
  *      getSn_FRAG(), setSn_FRAG(),  getSn_TOS(), setSn_TOS() \n
  *      getSn_TTL(), setSn_TTL()
  */
- 
+
 /**
  * @defgroup Common_register_group_W5100 Common register
  * @ingroup WIZCHIP_register_W5100
@@ -149,8 +147,7 @@
  * @sa PTIMER, PMAGIC : PPPoE.
  */
 
-
- /**
+/**
  * @defgroup Socket_register_group_W5100 Socket register
  * @ingroup WIZCHIP_register_W5100
  * @brief Socket register group\n
@@ -161,8 +158,8 @@
  * @sa Sn_MSSR, Sn_TOS, Sn_TTL, Sn_FRAG : Internet protocol.
  * @sa Sn_RXMEM_SIZE, Sn_TXMEM_SIZE, Sn_TX_FSR, Sn_TX_RD, Sn_TX_WR, Sn_RX_RSR, Sn_RX_RD, Sn_RX_WR : Data communication
  */
- 
- /**
+
+/**
  * @defgroup Basic_IO_function_W5100 Basic I/O function
  * @ingroup WIZCHIP_IO_Functions_W5100
  * @brief These are basic input/output functions to read values from register or write values to register.
@@ -173,14 +170,14 @@
  * @ingroup WIZCHIP_IO_Functions_W5100
  * @brief These are functions to access <b>common registers</b>.
  */
- 
+
 /**
  * @defgroup Socket_register_access_function_W5100 Socket register access functions
  * @ingroup WIZCHIP_IO_Functions_W5100
  * @brief These are functions to access <b>socket registers</b>.
  */
- 
- //-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
 
 //----------------------------- W5100 Common Registers IOMAP -----------------------------
 /**
@@ -199,38 +196,38 @@
  * - \ref MR_IND         	: Indirect Bus Interface mode
  */
 #if _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_
-   #define MR					(_WIZCHIP_IO_BASE_ + (0x0000))  // Mode
+#define MR (_WIZCHIP_IO_BASE_ + (0x0000)) // Mode
 #else
-   #define MR					(_W5100_IO_BASE_ + (0x0000))  // Mode
-#endif   
+#define MR (_W5100_IO_BASE_ + (0x0000)) // Mode
+#endif
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Gateway IP Register address(R/W)
  * @details \ref GAR configures the default gateway address.
  */
-#define GAR     			(_W5100_IO_BASE_ + (0x0001))  // GW Address
+#define GAR (_W5100_IO_BASE_ + (0x0001)) // GW Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Subnet mask Register address(R/W)
  * @details \ref SUBR configures the subnet mask address.
  */
-#define SUBR    			(_W5100_IO_BASE_ + (0x0005)) // SN Mask Address
+#define SUBR (_W5100_IO_BASE_ + (0x0005)) // SN Mask Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Source MAC Register address(R/W)
  * @details \ref SHAR configures the source hardware address.
  */
-#define SHAR    			(_W5100_IO_BASE_ + (0x0009)) // Source Hardware Address
+#define SHAR (_W5100_IO_BASE_ + (0x0009)) // Source Hardware Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Source IP Register address(R/W)
  * @details \ref SIPR configures the source IP address.
  */
-#define SIPR    			(_W5100_IO_BASE_ + (0x000F)) // Source IP Address
+#define SIPR (_W5100_IO_BASE_ + (0x000F)) // Source IP Address
 
 // Reserved					(_W5100_IO_BASE_ + (0x0013))
 // Reserved					(_W5100_IO_BASE_ + (0x0014))
@@ -251,9 +248,9 @@
  * - \ref IR_SOCK(3)  : SOCKET 3 Interrupt
  * - \ref IR_SOCK(2)  : SOCKET 2 Interrupt
  * - \ref IR_SOCK(1)  : SOCKET 1 Interrupt
- * - \ref IR_SOCK(0)  : SOCKET 0 Interrupt 
+ * - \ref IR_SOCK(0)  : SOCKET 0 Interrupt
  */
-#define IR					(_W5100_IO_BASE_ + (0x0015)) // Interrupt
+#define IR (_W5100_IO_BASE_ + (0x0015)) // Interrupt
 
 /**
  * @ingroup Common_register_group_W5100
@@ -261,7 +258,7 @@
  * @details Each bit of \ref _IMR_ corresponds to each bit of \ref IR.
  * When a bit of \ref _IMR_ is and the corresponding bit of \ref IR is set, Interrupt will be issued.
  */
-#define _IMR_    			(_W5100_IO_BASE_ + (0x0016)) // Socket Interrupt Mask
+#define _IMR_ (_W5100_IO_BASE_ + (0x0016)) // Socket Interrupt Mask
 
 /**
  * @ingroup Common_register_group_W5100
@@ -271,7 +268,7 @@
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
  * If the peer does not respond within the \ref _RTR_ time, W5100 retransmits the packet or issues timeout.
  */
-#define _RTR_     			(_W5100_IO_BASE_ + (0x0017)) // Retry Time
+#define _RTR_ (_W5100_IO_BASE_ + (0x0017)) // Retry Time
 
 /**
  * @ingroup Common_register_group_W5100
@@ -279,10 +276,9 @@
  * @details \ref _RCR_ configures the number of time of retransmission.
  * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
  */
-#define _RCR_      		(_W5100_IO_BASE_ + (0x0019)) // Retry Count
-#define RMSR				(_W5100_IO_BASE_ + (0x001A)) // Receicve Memory Size
-#define TMSR				(_W5100_IO_BASE_ + (0x001B)) // Trnasmit Memory Size
-
+#define _RCR_ (_W5100_IO_BASE_ + (0x0019)) // Retry Count
+#define RMSR (_W5100_IO_BASE_ + (0x001A))  // Receicve Memory Size
+#define TMSR (_W5100_IO_BASE_ + (0x001B))  // Trnasmit Memory Size
 
 /**
  * @ingroup Common_register_group_W5100
@@ -290,27 +286,24 @@
  * @details \ref PATR notifies authentication method that has been agreed at the connection with
  * PPPoE Server. W5100 supports two types of Authentication method - PAP and CHAP.
  */
-#define PATR            (_W5100_IO_BASE_ + (0x001C))
-
+#define PATR (_W5100_IO_BASE_ + (0x001C))
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief PPP LCP Request Timer register  in PPPoE mode(R)
  * @details \ref PTIMER configures the time for sending LCP echo request. The unit of time is 25ms.
  */
-#define PTIMER  			(_W5100_IO_BASE_ + (0x0028)) // PPP LCP RequestTimer
+#define PTIMER (_W5100_IO_BASE_ + (0x0028)) // PPP LCP RequestTimer
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief PPP LCP Magic number register  in PPPoE mode(R)
  * @details \ref PMAGIC configures the 4bytes magic number to be used in LCP negotiation.
  */
-#define PMAGIC   			(_W5100_IO_BASE_ + (0x0029)) // PPP LCP Magic number
+#define PMAGIC (_W5100_IO_BASE_ + (0x0029)) // PPP LCP Magic number
 
-#define UIPR0				(_W5100_IO_BASE_ + (0x002A))
-#define UPORT0          (_W5100_IO_BASE  + (0x002E))
-
-
+#define UIPR0 (_W5100_IO_BASE_ + (0x002A))
+#define UPORT0 (_W5100_IO_BASE + (0x002E))
 
 //----------------------------- W5100 Socket Registers -----------------------------
 
@@ -342,14 +335,14 @@
  * 		<tr>   <td><b>Protocol[3]</b></td> <td><b>Protocol[2]</b></td> <td><b>Protocol[1]</b></td> <td><b>Protocol[0]</b></td> <td>@b Meaning</td>   </tr>
  * 		<tr>   <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>MACRAW</td>   </tr>
  * 		<tr>   <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>PPPoE</td>   </tr>
- * </table> 
+ * </table>
  *	 - \ref Sn_MR_MACRAW	: MAC LAYER RAW SOCK \n
  *  - \ref Sn_MR_UDP		: UDP
  *  - \ref Sn_MR_TCP		: TCP
  *  - \ref Sn_MR_CLOSE	: Unused socket
  *  @note MACRAW mode should be only used in Socket 0.
  */
-#define Sn_MR(sn)			(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0000)) // socket Mode register
+#define Sn_MR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0000)) // socket Mode register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -375,9 +368,9 @@
  * 		<tr>   <td>0x25</td> <td>PCR</td> <td>In each phase, it transmits REQ message.</td> </tr>
  * 		<tr>   <td>0x26</td> <td>PCN</td> <td>In each phase, it transmits NAK message.</td> </tr>
  * 		<tr>   <td>0x27</td> <td>PCJ</td> <td>In each phase, it transmits REJECT message.</td> </tr>
- * </table> 
+ * </table>
  */
-#define Sn_CR(sn)			(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0001)) // channel Sn_CR register
+#define Sn_CR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0001)) // channel Sn_CR register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -398,7 +391,7 @@
  * - \ref Sn_IR_DISCON : <b>DISCON Interrupt</b>
  * - \ref Sn_IR_CON : <b>CON Interrupt</b>
  */
-#define Sn_IR(sn)			(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0002)) // channel interrupt register
+#define Sn_IR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0002)) // channel interrupt register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -421,15 +414,15 @@
  * - \ref SOCK_TIME_WAIT	: Closing state
  * - \ref SOCK_LAST_ACK 	: Closing state
  */
-#define Sn_SR(sn)			(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0003)) // channel status register
+#define Sn_SR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0003)) // channel status register
 
 /**
  * @ingroup Socket_register_group_W5100
  * @brief source port register(R/W)
  * @details \ref Sn_PORT configures the source port number of Socket n.
  * It is valid when Socket n is used in TCP/UDP mode. It should be set before OPEN command is ordered.
-*/
-#define Sn_PORT(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0004)) // source port register
+ */
+#define Sn_PORT(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0004)) // source port register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -437,7 +430,7 @@
  * @details \ref Sn_DHAR configures the destination hardware address of Socket n when using SEND_MAC command in UDP mode or
  * it indicates that it is acquired in ARP-process by CONNECT/SEND command.
  */
-#define Sn_DHAR(sn)     (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0006)) // Peer MAC register address
+#define Sn_DHAR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0006)) // Peer MAC register address
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -447,7 +440,7 @@
  * In TCP server mode, it indicates an IP address of TCP client after successfully establishing connection.
  * In UDP mode, it configures an IP address of peer to be received the UDP packet by SEND or SEND_MAC command.
  */
-#define Sn_DIPR(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x000C)) // Peer IP register address
+#define Sn_DIPR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x000C)) // Peer IP register address
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -457,14 +450,14 @@
  * In TCP Servermode, it indicates the port number of TCP client after successfully establishing connection.
  * In UDP mode, it configures the port number of peer to be transmitted the UDP packet by SEND/SEND_MAC command.
  */
-#define Sn_DPORT(sn)    (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0010)) // Peer port register address
+#define Sn_DPORT(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0010)) // Peer port register address
 
 /**
  * @ingroup Socket_register_group_W5100
  * @brief Maximum Segment Size(Sn_MSSR0) register address(R/W)
  * @details \ref Sn_MSSR configures or indicates the MTU(Maximum Transfer Unit) of Socket n.
  */
-#define Sn_MSSR(sn)	   (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0012)) // Maximum Segment Size(Sn_MSSR0) register address
+#define Sn_MSSR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0012)) // Maximum Segment Size(Sn_MSSR0) register address
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -472,7 +465,7 @@
  * @details \ref Sn_PROTO that sets the protocol number field of the IP header at the IP layer. It is
  * valid only in IPRAW mode, and ignored in other modes.
  */
-#define Sn_PROTO(sn)	   (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0014)) // Protocol of IP Header field register in IP raw mode
+#define Sn_PROTO(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0014)) // Protocol of IP Header field register in IP raw mode
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -480,7 +473,7 @@
  * @details \ref Sn_TOS configures the TOS(Type Of Service field in IP Header) of Socket n.
  * It is set before OPEN command.
  */
-#define Sn_TOS(sn)			(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + 0x0015) // IP Type of Service(TOS) Register 
+#define Sn_TOS(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + 0x0015) // IP Type of Service(TOS) Register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -488,7 +481,7 @@
  * @details \ref Sn_TTL configures the TTL(Time To Live field in IP header) of Socket n.
  * It is set before OPEN command.
  */
-#define Sn_TTL(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0016)) // IP Time to live(TTL) Register 
+#define Sn_TTL(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0016)) // IP Time to live(TTL) Register
 
 // Reserved					(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0017))
 // Reserved					(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0018))
@@ -507,7 +500,7 @@
  * transmit the data with SEND/SEND_MAC command after saving the data in Socket n TX buffer. But, if data is bigger than its checked size,
  * transmit the data after dividing into the checked size and saving in the Socket n TX buffer.
  */
-#define Sn_TX_FSR(sn)	(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0020)) // Transmit free memory size register
+#define Sn_TX_FSR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0020)) // Transmit free memory size register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -519,7 +512,7 @@
  * If its increment value exceeds the maximum value 0xFFFF, (greater than 0x10000 and the carry bit occurs),
  * then the carry bit is ignored and will automatically update with the lower 16bits value.
  */
-#define Sn_TX_RD(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0022)) // Transmit memory read pointer register address
+#define Sn_TX_RD(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0022)) // Transmit memory read pointer register address
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -533,7 +526,7 @@
  * then the carry bit is ignored and will automatically update with the lower 16bits value.\n
  * 4. Transmit the saved data in Socket n TX Buffer by using SEND/SEND command
  */
-#define Sn_TX_WR(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0024)) // Transmit memory write pointer register address
+#define Sn_TX_WR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0024)) // Transmit memory write pointer register address
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -542,7 +535,7 @@
  * \ref Sn_RX_RSR does not exceed the \ref Sn_RXMEM_SIZE and is calculated as the difference between
  * Socket n RX Write Pointer (\ref Sn_RX_WR)and Socket n RX Read Pointer (\ref Sn_RX_RD)
  */
-#define Sn_RX_RSR(sn)	(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0026)) // Received data size register
+#define Sn_RX_RSR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0026)) // Received data size register
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -555,7 +548,7 @@
  * update with the lower 16bits value ignored the carry bit.\n
  * 4. Order RECV command is for notifying the updated \ref Sn_RX_RD to W5100.
  */
-#define Sn_RX_RD(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0028)) // Read point of Receive memory
+#define Sn_RX_RD(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0028)) // Read point of Receive memory
 
 /**
  * @ingroup Socket_register_group_W5100
@@ -564,8 +557,7 @@
  * If the increased value exceeds the maximum value 0xFFFF, (greater than 0x10000 and the carry bit occurs),
  * then the carry bit is ignored and will automatically update with the lower 16bits value.
  */
-#define Sn_RX_WR(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x002A)) // Write point of Receive memory
-
+#define Sn_RX_WR(sn) (_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x002A)) // Write point of Receive memory
 
 //----------------------------- W5100 Register values  -----------------------------
 
@@ -574,8 +566,7 @@
  * @brief Reset
  * @details If this bit is  All internal registers will be initialized. It will be automatically cleared as after S/W reset.
  */
-#define MR_RST				0x80 ///< reset 
-
+#define MR_RST 0x80 ///< reset
 
 /**
  * @brief Ping block
@@ -583,7 +574,7 @@
  * 1 : Enable Ping block\n
  * If the bit is  it blocks the response to a ping request.
  */
-#define MR_PB				0x10 ///< ping block 
+#define MR_PB 0x10 ///< ping block
 
 /**
  * @brief Enable PPPoE
@@ -591,7 +582,7 @@
  * 1 : EnablePPPoE mode\n
  * If you use ADSL, this bit should be '1'.
  */
-#define MR_PPPOE			0x08 ///< enable pppoe 
+#define MR_PPPOE 0x08 ///< enable pppoe
 
 /**
  * @brief Address Auto-Increment in Indirect Bus Interface
@@ -600,7 +591,7 @@
  * At the Indirect Bus Interface mode, if this bit is set as ��1��, the address will
  * be automatically increased by 1 whenever read and write are performed.
  */
-#define MR_AI				0x02 ///< auto-increment in indirect mode 
+#define MR_AI 0x02 ///< auto-increment in indirect mode
 
 /**
  * @brief Indirect Bus Interface mode
@@ -608,65 +599,64 @@
  * 1 : Enable Indirect bus Interface mode \n
  * If this bit is set as ��1��, Indirect Bus Interface mode is set.
  */
-#define MR_IND				0x01 ///< enable indirect mode 
+#define MR_IND 0x01 ///< enable indirect mode
 
 /* IR register values */
 /**
  * @brief Check IP conflict.
  * @details Bit is set as when own source IP address is same with the sender IP address in the received ARP request.
  */
-#define IR_CONFLICT			0x80 ///< check ip confict 
+#define IR_CONFLICT 0x80 ///< check ip confict
 
 /**
  * @brief Get the destination unreachable message in UDP sending.
- * @details When receiving the ICMP (Destination port unreachable) packet, this bit is set as 
+ * @details When receiving the ICMP (Destination port unreachable) packet, this bit is set as
  * When this bit is  Destination Information such as IP address and Port number may be checked with the corresponding @ref UIPR & @ref UPORTR.
  */
-#define IR_UNREACH			0x40 ///< check destination unreachable
+#define IR_UNREACH 0x40 ///< check destination unreachable
 
 /**
  * @brief Get the PPPoE close message.
  * @details When PPPoE is disconnected during PPPoE mode, this bit is set.
  */
-#define IR_PPPoE			0x20 ///< get the PPPoE close message 
+#define IR_PPPoE 0x20 ///< get the PPPoE close message
 
-#define IR_SOCK(sn)		(0x01 << sn)	///< check socket interrupt
+#define IR_SOCK(sn) (0x01 << sn) ///< check socket interrupt
 
-
-// Sn_MR values 
+// Sn_MR values
 /* Sn_MR Default values */
 /**
  * @brief Unused socket
  * @details This configures the protocol mode of Socket n.
  */
-#define Sn_MR_CLOSE			0x00 ///< unused socket 
+#define Sn_MR_CLOSE 0x00 ///< unused socket
 
 /**
  * @brief TCP
  * @details This configures the protocol mode of Socket n.
  */
-#define Sn_MR_TCP			0x01 ///< TCP 
+#define Sn_MR_TCP 0x01 ///< TCP
 
 /**
  * @brief UDP
  * @details This configures the protocol mode of Socket n.
  */
-#define Sn_MR_UDP       0x02 ///< UDP 
-#define Sn_MR_IPRAW     0x03 ///< IP LAYER RAW SOCK 
+#define Sn_MR_UDP 0x02	 ///< UDP
+#define Sn_MR_IPRAW 0x03 ///< IP LAYER RAW SOCK
 
 /**
  * @brief MAC LAYER RAW SOCK
  * @details This configures the protocol mode of Socket n.
  * @note MACRAW mode should be only used in Socket 0.
  */
-#define Sn_MR_MACRAW		0x04 ///< MAC LAYER RAW SOCK 
+#define Sn_MR_MACRAW 0x04 ///< MAC LAYER RAW SOCK
 
 /**
  * @brief PPPoE
  * @details This configures the protocol mode of Socket n.
  * @note PPPoE mode should be only used in Socket 0.
  */
-#define Sn_MR_PPPoE			0x05 ///< PPPoE
+#define Sn_MR_PPPoE 0x05 ///< PPPoE
 
 /**
  * @brief No Delayed Ack(TCP), Multicast flag
@@ -676,7 +666,7 @@
  * When this bit is  It sends the ACK packet without delay as soon as a Data packet is received from a peer.\n
  * When this bit is  It sends the ACK packet after waiting for the timeout time configured by \ref _RTR_.
  */
-#define Sn_MR_ND			0x20 ///< No Delayed Ack(TCP) flag 
+#define Sn_MR_ND 0x20 ///< No Delayed Ack(TCP) flag
 
 /**
  * @brief Support UDP Multicasting
@@ -685,7 +675,7 @@
  * This bit is applied only during UDP mode(P[3:0] = 010 and MULTI = '1')
  * It configures the version for IGMP messages (Join/Leave/Report).
  */
-#define Sn_MR_MC			Sn_MR_ND ///< Select IGMP version 1(0) or 2(1) 
+#define Sn_MR_MC Sn_MR_ND ///< Select IGMP version 1(0) or 2(1)
 
 /**
  * @brief MAC filter enable in @ref Sn_MR_MACRAW mode
@@ -697,9 +687,8 @@
  * If user wants to implement Hybrid TCP/IP stack,
  * it is recommended that this bit is set as for reducing host overhead to process the all received packets.
  */
-#define Sn_MR_MF			0x40 ///< Use MAC filter
-#define Sn_MR_MFEN      Sn_MR_MF
-
+#define Sn_MR_MF 0x40 ///< Use MAC filter
+#define Sn_MR_MFEN Sn_MR_MF
 
 /* Sn_MR Default values */
 /**
@@ -710,7 +699,7 @@
  * To use multicasting, \ref Sn_DIPR & \ref Sn_DPORT should be respectively configured with the multicast group IP address & port number
  * before Socket n is opened by OPEN command of \ref Sn_CR.
  */
-#define Sn_MR_MULTI			0x80 ///< support multicating 
+#define Sn_MR_MULTI 0x80 ///< support multicating
 
 /* Sn_CR values */
 /**
@@ -727,7 +716,7 @@
  *   <tr>  <td>S0_MR_PPPoE  (101)</td>  <td>SOCK_PPPoE (0x5F)</td>  </tr>
  * </table>
  */
-#define Sn_CR_OPEN			0x01 ///< initialize or open socket 
+#define Sn_CR_OPEN 0x01 ///< initialize or open socket
 
 /**
  * @brief Wait connection request in TCP mode(Server mode)
@@ -735,10 +724,10 @@
  * In this mode, Socket n operates as a 'TCP server' and waits for connection-request (SYN packet) from any 'TCP client'.//
  * The \ref Sn_SR changes the state from SOCK_INIT to SOCKET_LISTEN.//
  * When a 'TCP client' connection request is successfully established,
- * the \ref Sn_SR changes from SOCK_LISTEN to SOCK_ESTABLISHED and the Sn_IR(0) becomes 
+ * the \ref Sn_SR changes from SOCK_LISTEN to SOCK_ESTABLISHED and the Sn_IR(0) becomes
  * But when a 'TCP client' connection request is failed, Sn_IR(3) becomes and the status of \ref Sn_SR changes to SOCK_CLOSED.
  */
-#define Sn_CR_LISTEN		0x02 ///< wait connection request in tcp mode(Server mode) 
+#define Sn_CR_LISTEN 0x02 ///< wait connection request in tcp mode(Server mode)
 
 /**
  * @brief Send connection request in TCP mode(Client mode)
@@ -750,7 +739,7 @@
  * 3. When a @b RST packet is received instead of a @b SYN/ACK packet. In these cases, \ref Sn_SR is changed to \ref SOCK_CLOSED.
  * @note This is valid only in TCP mode and operates when Socket n acts as <b>TCP client</b>
  */
-#define Sn_CR_CONNECT		0x04 ///< send connection request in tcp mode(Client mode) 
+#define Sn_CR_CONNECT 0x04 ///< send connection request in tcp mode(Client mode)
 
 /**
  * @brief Send closing request in TCP mode
@@ -763,13 +752,13 @@
  * Otherwise, TCPTO occurs (Sn_IR(3)='1') and then \ref Sn_SR is changed to \ref SOCK_CLOSED.
  * @note Valid only in TCP mode.
  */
-#define Sn_CR_DISCON		0x08 ///< send closing reqeuset in tcp mode 
+#define Sn_CR_DISCON 0x08 ///< send closing reqeuset in tcp mode
 
 /**
  * @brief Close socket
  * @details Sn_SR is changed to \ref SOCK_CLOSED.
  */
-#define Sn_CR_CLOSE         0x10
+#define Sn_CR_CLOSE 0x10
 
 /**
  * @brief Update TX buffer pointer and send data
@@ -777,7 +766,7 @@
  * For more details, please refer to Socket n TX Free Size Register (\ref Sn_TX_FSR), Socket n,
  * TX Write Pointer Register(\ref Sn_TX_WR), and Socket n TX Read Pointer Register(\ref Sn_TX_RD).
  */
-#define Sn_CR_SEND          0x20
+#define Sn_CR_SEND 0x20
 
 /**
  * @brief Send data with MAC address, so without ARP process
@@ -787,7 +776,7 @@
  * In this case, the destination hardware address is acquired from \ref Sn_DHAR configured by host, instead of APR-process.
  * @note Valid only in UDP mode.
  */
-#define Sn_CR_SEND_MAC      0x21
+#define Sn_CR_SEND_MAC 0x21
 
 /**
  * @brief Send keep alive message
@@ -795,7 +784,7 @@
  * If the peer can not respond to the keep-alive packet during timeout time, the connection is terminated and the timeout interrupt will occur.
  * @note Valid only in TCP mode.
  */
-#define Sn_CR_SEND_KEEP     0x22
+#define Sn_CR_SEND_KEEP 0x22
 
 /**
  * @brief Update RX buffer pointer and receive data
@@ -803,86 +792,86 @@
  * For more details, refer to Socket n RX Received Size Register (\ref Sn_RX_RSR), Socket n RX Write Pointer Register (\ref Sn_RX_WR),
  * and Socket n RX Read Pointer Register (\ref Sn_RX_RD).
  */
-#define Sn_CR_RECV          0x40
+#define Sn_CR_RECV 0x40
 
 /**
  * @brief PPPoE connection
  * @details PPPoE connection begins by transmitting PPPoE discovery packet
  */
-#define Sn_CR_PCON			0x23
+#define Sn_CR_PCON 0x23
 
 /**
  * @brief Closes PPPoE connection
  * @details Closes PPPoE connection
- */		 
-#define Sn_CR_PDISCON		0x24		 
+ */
+#define Sn_CR_PDISCON 0x24
 
 /**
  * @brief REQ message transmission
  * @details In each phase, it transmits REQ message.
  */
-#define Sn_CR_PCR			0x25		 
+#define Sn_CR_PCR 0x25
 
 /**
  * @brief NAK massage transmission
  * @details In each phase, it transmits NAK message.
  */
-#define Sn_CR_PCN			0x26		
+#define Sn_CR_PCN 0x26
 
 /**
  * @brief REJECT message transmission
  * @details In each phase, it transmits REJECT message.
  */
-#define Sn_CR_PCJ			0x27		
+#define Sn_CR_PCJ 0x27
 
 /* Sn_IR values */
 /**
  * @brief PPP Receive Interrupt
  * @details PPP Receive Interrupts when the option which is not supported is received.
  */
-#define Sn_IR_PRECV			0x80	
+#define Sn_IR_PRECV 0x80
 
 /**
  * @brief PPP Fail Interrupt
  * @details PPP Fail Interrupts when PAP Authentication is failed.
- */	
-#define Sn_IR_PFAIL			0x40		
+ */
+#define Sn_IR_PFAIL 0x40
 
 /**
  * @brief PPP Next Phase Interrupt
  * @details PPP Next Phase Interrupts when the phase is changed during ADSL connection process.
  */
-#define Sn_IR_PNEXT			0x20		
+#define Sn_IR_PNEXT 0x20
 
 /**
  * @brief SEND_OK Interrupt
  * @details This is issued when SEND command is completed.
  */
-#define Sn_IR_SENDOK		0x10 ///< complete sending 
+#define Sn_IR_SENDOK 0x10 ///< complete sending
 
 /**
  * @brief TIMEOUT Interrupt
  * @details This is issued when ARPTO or TCPTO occurs.
  */
-#define Sn_IR_TIMEOUT		0x08 ///< assert timeout 
+#define Sn_IR_TIMEOUT 0x08 ///< assert timeout
 
 /**
  * @brief RECV Interrupt
  * @details This is issued whenever data is received from a peer.
  */
-#define Sn_IR_RECV          0x04
+#define Sn_IR_RECV 0x04
 
 /**
  * @brief DISCON Interrupt
  * @details This is issued when FIN or FIN/ACK packet is received from a peer.
  */
-#define Sn_IR_DISCON        0x02
+#define Sn_IR_DISCON 0x02
 
 /**
  * @brief CON Interrupt
  * @details This is issued one time when the connection with peer is successful and then \ref Sn_SR is changed to \ref SOCK_ESTABLISHED.
  */
-#define Sn_IR_CON           0x01
+#define Sn_IR_CON 0x01
 
 /* Sn_SR values */
 /**
@@ -890,7 +879,7 @@
  * @details This indicates that Socket n is released.\n
  * When DICON, CLOSE command is ordered, or when a timeout occurs, it is changed to \ref SOCK_CLOSED regardless of previous status.
  */
-#define SOCK_CLOSED			0x00 ///< closed 
+#define SOCK_CLOSED 0x00 ///< closed
 
 /**
  * @brief Initiate state
@@ -898,7 +887,7 @@
  * It is changed to \ref SOCK_INIT when Sn_MR(P[3:0]) = 001)and OPEN command is ordered.\n
  * After \ref SOCK_INIT, user can use LISTEN /CONNECT command.
  */
-#define SOCK_INIT 			0x13 ///< init state 
+#define SOCK_INIT 0x13 ///< init state
 
 /**
  * @brief Listen state
@@ -906,7 +895,7 @@
  * It will change to \ref SOCK_ESTABLISHED when the connection-request is successfully accepted.\n
  * Otherwise it will change to \ref SOCK_CLOSED after TCPTO occurred (Sn_IR(TIMEOUT) = '1').
  */
-#define SOCK_LISTEN         0x14
+#define SOCK_LISTEN 0x14
 
 /**
  * @brief Connection state
@@ -915,7 +904,7 @@
  * If connect-accept(SYN/ACK packet) is received from the peer at SOCK_SYNSENT, it changes to \ref SOCK_ESTABLISHED.\n
  * Otherwise, it changes to \ref SOCK_CLOSED after TCPTO (\ref Sn_IR[TIMEOUT] = '1') is occurred.
  */
-#define SOCK_SYNSENT        0x15
+#define SOCK_SYNSENT 0x15
 
 /**
  * @brief Connection state
@@ -923,7 +912,7 @@
  * If socket n sends the response (SYN/ACK  packet) to the peer successfully,  it changes to \ref SOCK_ESTABLISHED. \n
  * If not, it changes to \ref SOCK_CLOSED after timeout occurs (\ref Sn_IR[TIMEOUT] = '1').
  */
-#define SOCK_SYNRECV        0x16
+#define SOCK_SYNRECV 0x16
 
 /**
  * @brief Success to connect
@@ -932,7 +921,7 @@
  * when the CONNECT command is successful.\n
  * During \ref SOCK_ESTABLISHED, DATA packet can be transferred using SEND or RECV command.
  */
-#define SOCK_ESTABLISHED    0x17
+#define SOCK_ESTABLISHED 0x17
 
 /**
  * @brief Closing state
@@ -940,7 +929,7 @@
  * These are shown in disconnect-process such as active-close and passive-close.\n
  * When Disconnect-process is successfully completed, or when timeout occurs, these change to \ref SOCK_CLOSED.
  */
-#define SOCK_FIN_WAIT       0x18
+#define SOCK_FIN_WAIT 0x18
 
 /**
  * @brief Closing state
@@ -948,7 +937,7 @@
  * These are shown in disconnect-process such as active-close and passive-close.\n
  * When Disconnect-process is successfully completed, or when timeout occurs, these change to \ref SOCK_CLOSED.
  */
-#define SOCK_CLOSING        0x1A
+#define SOCK_CLOSING 0x1A
 
 /**
  * @brief Closing state
@@ -956,7 +945,7 @@
  * These are shown in disconnect-process such as active-close and passive-close.\n
  * When Disconnect-process is successfully completed, or when timeout occurs, these change to \ref SOCK_CLOSED.
  */
-#define SOCK_TIME_WAIT      0x1B
+#define SOCK_TIME_WAIT 0x1B
 
 /**
  * @brief Closing state
@@ -964,14 +953,14 @@
  * This is half-closing status, and data can be transferred.\n
  * For full-closing, DISCON command is used. But For just-closing, @ref Sn_CR_CLOSE command is used.
  */
-#define SOCK_CLOSE_WAIT     0x1C
+#define SOCK_CLOSE_WAIT 0x1C
 
 /**
  * @brief Closing state
  * @details This indicates Socket n is waiting for the response (FIN/ACK packet) to the disconnect-request (FIN packet) by passive-close.\n
  * It changes to \ref SOCK_CLOSED when Socket n received the response successfully, or when timeout occurs  (\ref Sn_IR[TIMEOUT] = '1').
  */
-#define SOCK_LAST_ACK       0x1D
+#define SOCK_LAST_ACK 0x1D
 
 /**
  * @brief UDP socket
@@ -979,15 +968,15 @@
  * It changes to SOCK_UDP when Sn_MR(P[3:0]) = 010 and @ref Sn_CR_OPEN command is ordered.\n
  * Unlike TCP mode, data can be transfered without the connection-process.
  */
-#define SOCK_UDP			0x22 ///< udp socket 
+#define SOCK_UDP 0x22 ///< udp socket
 
 /**
  * @brief IP raw mode socket
  * @details TThe socket is opened in IPRAW mode. The SOCKET status is change to SOCK_IPRAW when @ref Sn_MR (P3:P0) is
  * Sn_MR_IPRAW and @ref Sn_CR_OPEN command is used.\n
  * IP Packet can be transferred without a connection similar to the UDP mode.
-*/
-#define SOCK_IPRAW			0x32 ///< ip raw mode socket 
+ */
+#define SOCK_IPRAW 0x32 ///< ip raw mode socket
 
 /**
  * @brief MAC raw mode socket
@@ -995,7 +984,7 @@
  * It changes to SOCK_MACRAW when @ref Sn_MR(P[3:0]) = '100' and @ref Sn_CR_OPEN command is ordered.\n
  * Like UDP mode socket, MACRAW mode Socket 0 can transfer a MAC packet (Ethernet frame) without the connection-process.
  */
-#define SOCK_MACRAW			0x42 ///< mac raw mode socket 
+#define SOCK_MACRAW 0x42 ///< mac raw mode socket
 
 /**
  * @brief PPPoE mode socket
@@ -1004,19 +993,19 @@
  * It is temporarily used at the PPPoE
 connection.
  */
-#define SOCK_PPPOE			0x5F ///< pppoe socket 
+#define SOCK_PPPOE 0x5F ///< pppoe socket
 
-// IP PROTOCOL 
-#define IPPROTO_IP			0 ///< Dummy for IP 
-#define IPPROTO_ICMP		   1 ///< Control message protocol 
-#define IPPROTO_IGMP		   2 ///< Internet group management protocol 
-#define IPPROTO_GGP			3 ///< GW^2 (deprecated) 
-#define IPPROTO_TCP			6 ///< TCP 
-#define IPPROTO_PUP			12 ///< PUP 
-#define IPPROTO_UDP			17 ///< UDP 
-#define IPPROTO_IDP			22 ///< XNS idp 
-#define IPPROTO_ND			77 ///< UNOFFICIAL net disk protocol 
-#define IPPROTO_RAW			255 ///< Raw IP packet 
+// IP PROTOCOL
+#define IPPROTO_IP 0	///< Dummy for IP
+#define IPPROTO_ICMP 1	///< Control message protocol
+#define IPPROTO_IGMP 2	///< Internet group management protocol
+#define IPPROTO_GGP 3	///< GW^2 (deprecated)
+#define IPPROTO_TCP 6	///< TCP
+#define IPPROTO_PUP 12	///< PUP
+#define IPPROTO_UDP 17	///< UDP
+#define IPPROTO_IDP 22	///< XNS idp
+#define IPPROTO_ND 77	///< UNOFFICIAL net disk protocol
+#define IPPROTO_RAW 255 ///< Raw IP packet
 
 /**
  * @brief Enter a critical section
@@ -1029,7 +1018,7 @@ connection.
  * \sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
  * \sa WIZCHIP_CRITICAL_EXIT()
  */
-#define WIZCHIP_CRITICAL_ENTER()    WIZCHIP.CRIS._enter()
+#define WIZCHIP_CRITICAL_ENTER() WIZCHIP.CRIS._enter()
 
 #ifdef _exit
 #undef _exit
@@ -1046,15 +1035,13 @@ connection.
  * @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
  * @sa WIZCHIP_CRITICAL_ENTER()
  */
-#define WIZCHIP_CRITICAL_EXIT()     WIZCHIP.CRIS._exit()
-
-
+#define WIZCHIP_CRITICAL_EXIT() WIZCHIP.CRIS._exit()
 
 ////////////////////////
 // Basic I/O Function //
 ////////////////////////
 //
-//M20150601 :  uint16_t AddrSel --> uint32_t AddrSel
+// M20150601 :  uint16_t AddrSel --> uint32_t AddrSel
 //
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1062,7 +1049,7 @@ connection.
  * @param AddrSel Register address
  * @return The value of register
  */
-uint8_t  WIZCHIP_READ (uint32_t AddrSel);
+uint8_t WIZCHIP_READ(uint32_t AddrSel);
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1071,7 +1058,7 @@ uint8_t  WIZCHIP_READ (uint32_t AddrSel);
  * @param wb Write data
  * @return void
  */
-void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb );
+void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb);
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1080,7 +1067,7 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb );
  * @param pBuf Pointer buffer to read data
  * @param len Data length
  */
-void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
+void WIZCHIP_READ_BUF(uint32_t AddrSel, uint8_t *pBuf, uint16_t len);
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1089,8 +1076,7 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param pBuf Pointer buffer to write data
  * @param len Data length
  */
-void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
-
+void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t *pBuf, uint16_t len);
 
 /////////////////////////////////
 // Common Register IO function //
@@ -1103,9 +1089,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getMR()
  */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
-   #define setMR(mr) 	WIZCHIP_WRITE(MR,mr)
+#define setMR(mr) WIZCHIP_WRITE(MR, mr)
 #else
-   #define setMR(mr)    (*((uint8_t*)MR) = mr)
+#define setMR(mr) (*((uint8_t *)MR) = mr)
 #endif
 
 /**
@@ -1115,11 +1101,11 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setMR()
  */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
-   #define getMR() 		WIZCHIP_READ(MR)
+#define getMR() WIZCHIP_READ(MR)
 #else
-   #define getMR()      (*(uint8_t*)MR)
+#define getMR() (*(uint8_t *)MR)
 #endif
-   
+
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Set @ref GAR.
@@ -1127,7 +1113,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getGAR()
  */
 #define setGAR(gar) \
-		WIZCHIP_WRITE_BUF(GAR,gar,4)
+	WIZCHIP_WRITE_BUF(GAR, gar, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1136,7 +1122,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setGAR()
  */
 #define getGAR(gar) \
-		WIZCHIP_READ_BUF(GAR,gar,4)
+	WIZCHIP_READ_BUF(GAR, gar, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1148,7 +1134,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSUBR()
  */
 #define setSUBR(subr) \
-      WIZCHIP_WRITE_BUF(SUBR,subr,4)
+	WIZCHIP_WRITE_BUF(SUBR, subr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1157,7 +1143,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSUBR()
  */
 #define getSUBR(subr) \
-		WIZCHIP_READ_BUF(SUBR, subr, 4)
+	WIZCHIP_READ_BUF(SUBR, subr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1166,7 +1152,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSHAR()
  */
 #define setSHAR(shar) \
-		WIZCHIP_WRITE_BUF(SHAR, shar, 6)
+	WIZCHIP_WRITE_BUF(SHAR, shar, 6)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1175,16 +1161,16 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSHAR()
  */
 #define getSHAR(shar) \
-		WIZCHIP_READ_BUF(SHAR, shar, 6)
+	WIZCHIP_READ_BUF(SHAR, shar, 6)
 
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Set @ref SIPR.
  * @param (uint8_t*)sipr Pointer variable to set local IP address. It should be allocated 4 bytes.
  * @sa getSIPR()
-*/
+ */
 #define setSIPR(sipr) \
-		WIZCHIP_WRITE_BUF(SIPR, sipr, 4)
+	WIZCHIP_WRITE_BUF(SIPR, sipr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1193,7 +1179,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSIPR()
  */
 #define getSIPR(sipr) \
-		WIZCHIP_READ_BUF(SIPR, sipr, 4)
+	WIZCHIP_READ_BUF(SIPR, sipr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1202,7 +1188,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getIR()
  */
 #define setIR(ir) \
-		WIZCHIP_WRITE(IR, (ir & 0xA0))
+	WIZCHIP_WRITE(IR, (ir & 0xA0))
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Get \ref IR register
@@ -1210,7 +1196,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setIR()
  */
 #define getIR() \
-		(WIZCHIP_READ(IR) & 0xA0)
+	(WIZCHIP_READ(IR) & 0xA0)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1219,7 +1205,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getIMR()
  */
 #define setIMR(imr) \
-		WIZCHIP_WRITE(_IMR_, imr)
+	WIZCHIP_WRITE(_IMR_, imr)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1228,7 +1214,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setIMR()
  */
 #define getIMR() \
-		WIZCHIP_READ(_IMR_)
+	WIZCHIP_READ(_IMR_)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1236,9 +1222,10 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint16_t)rtr Value to set @ref _RTR_ register.
  * @sa getRTR()
  */
-#define setRTR(rtr)   {\
-		WIZCHIP_WRITE(_RTR_,   (uint8_t)(rtr >> 8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(_RTR_,1), (uint8_t) rtr); \
+#define setRTR(rtr)                                                \
+	{                                                              \
+		WIZCHIP_WRITE(_RTR_, (uint8_t)(rtr >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(_RTR_, 1), (uint8_t)rtr); \
 	}
 
 /**
@@ -1248,7 +1235,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setRTR()
  */
 #define getRTR() \
-		(((uint16_t)WIZCHIP_READ(_RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_RTR_,1)))
+	(((uint16_t)WIZCHIP_READ(_RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_RTR_, 1)))
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1257,7 +1244,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getRCR()
  */
 #define setRCR(rcr) \
-		WIZCHIP_WRITE(_RCR_, rcr)
+	WIZCHIP_WRITE(_RCR_, rcr)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1266,15 +1253,15 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setRCR()
  */
 #define getRCR() \
-		WIZCHIP_READ(_RCR_)
+	WIZCHIP_READ(_RCR_)
 
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Get \ref RMSR register
  * @sa getRMSR()
  */
-#define setRMSR(rmsr)   \
-      WIZCHIP_WRITE(RMSR) // Receicve Memory Size
+#define setRMSR(rmsr) \
+	WIZCHIP_WRITE(RMSR) // Receicve Memory Size
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1282,16 +1269,16 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value of @ref RMSR register.
  * @sa setRMSR()
  */
- #define getRMSR()   \
-      WIZCHIP_READ() // Receicve Memory Size
+#define getRMSR() \
+	WIZCHIP_READ() // Receicve Memory Size
 
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Get \ref TMSR register
  * @sa getTMSR()
  */
-#define setTMSR(rmsr)   \
-      WIZCHIP_WRITE(TMSR) // Receicve Memory Size
+#define setTMSR(rmsr) \
+	WIZCHIP_WRITE(TMSR) // Receicve Memory Size
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1300,14 +1287,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setTMSR()
  */
 
-
 /**
  * @ingroup Common_register_access_function_W5100
  * @brief Get \ref PATR register
  * @return uint16_t. Value to set \ref PATR register
  */
 #define getPATR() \
-		(((uint16_t)WIZCHIP_READ(PATR) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PATR,1)))
+	(((uint16_t)WIZCHIP_READ(PATR) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PATR, 1)))
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1315,8 +1301,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value to set \ref PPPALGO register
  */
 #define getPPPALGO() \
-		WIZCHIP_READ(PPPALGO)
-
+	WIZCHIP_READ(PPPALGO)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1325,7 +1310,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getPTIMER()
  */
 #define setPTIMER(ptimer) \
-		WIZCHIP_WRITE(PTIMER, ptimer)
+	WIZCHIP_WRITE(PTIMER, ptimer)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1334,7 +1319,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setPTIMER()
  */
 #define getPTIMER() \
-		WIZCHIP_READ(PTIMER)
+	WIZCHIP_READ(PTIMER)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1343,7 +1328,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getPMAGIC()
  */
 #define setPMAGIC(pmagic) \
-		WIZCHIP_WRITE(PMAGIC, pmagic)
+	WIZCHIP_WRITE(PMAGIC, pmagic)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1352,7 +1337,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setPMAGIC()
  */
 #define getPMAGIC() \
-		WIZCHIP_READ(PMAGIC)
+	WIZCHIP_READ(PMAGIC)
 
 ///////////////////////////////////
 // Socket N register I/O function //
@@ -1365,7 +1350,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_MR()
  */
 #define setSn_MR(sn, mr) \
-		WIZCHIP_WRITE(Sn_MR(sn),mr)
+	WIZCHIP_WRITE(Sn_MR(sn), mr)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1385,7 +1370,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_CR()
  */
 #define setSn_CR(sn, cr) \
-		WIZCHIP_WRITE(Sn_CR(sn), cr)
+	WIZCHIP_WRITE(Sn_CR(sn), cr)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1395,7 +1380,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_CR()
  */
 #define getSn_CR(sn) \
-		WIZCHIP_READ(Sn_CR(sn))
+	WIZCHIP_READ(Sn_CR(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1405,7 +1390,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_IR()
  */
 #define setSn_IR(sn, ir) \
-		WIZCHIP_WRITE(Sn_IR(sn), ir)
+	WIZCHIP_WRITE(Sn_IR(sn), ir)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1415,7 +1400,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_IR()
  */
 #define getSn_IR(sn) \
-		WIZCHIP_READ(Sn_IR(sn))
+	WIZCHIP_READ(Sn_IR(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1424,7 +1409,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value of @ref Sn_SR.
  */
 #define getSn_SR(sn) \
-		WIZCHIP_READ(Sn_SR(sn))
+	WIZCHIP_READ(Sn_SR(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1433,9 +1418,10 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint16_t)port Value to set @ref Sn_PORT.
  * @sa getSn_PORT()
  */
-#define setSn_PORT(sn, port)  { \
-		WIZCHIP_WRITE(Sn_PORT(sn),   (uint8_t)(port >> 8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1), (uint8_t) port); \
+#define setSn_PORT(sn, port)                                              \
+	{                                                                     \
+		WIZCHIP_WRITE(Sn_PORT(sn), (uint8_t)(port >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_PORT(sn), 1), (uint8_t)port); \
 	}
 
 /**
@@ -1446,7 +1432,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_PORT()
  */
 #define getSn_PORT(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_PORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_PORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_PORT(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1456,7 +1442,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_DHAR()
  */
 #define setSn_DHAR(sn, dhar) \
-		WIZCHIP_WRITE_BUF(Sn_DHAR(sn), dhar, 6)
+	WIZCHIP_WRITE_BUF(Sn_DHAR(sn), dhar, 6)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1466,7 +1452,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_DHAR()
  */
 #define getSn_DHAR(sn, dhar) \
-		WIZCHIP_READ_BUF(Sn_DHAR(sn), dhar, 6)
+	WIZCHIP_READ_BUF(Sn_DHAR(sn), dhar, 6)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1476,7 +1462,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_DIPR()
  */
 #define setSn_DIPR(sn, dipr) \
-		WIZCHIP_WRITE_BUF(Sn_DIPR(sn), dipr, 4)
+	WIZCHIP_WRITE_BUF(Sn_DIPR(sn), dipr, 4)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1486,7 +1472,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa SetSn_DIPR()
  */
 #define getSn_DIPR(sn, dipr) \
-		WIZCHIP_READ_BUF(Sn_DIPR(sn), dipr, 4)
+	WIZCHIP_READ_BUF(Sn_DIPR(sn), dipr, 4)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1495,9 +1481,10 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint16_t)dport Value to set @ref Sn_DPORT
  * @sa getSn_DPORT()
  */
-#define setSn_DPORT(sn, dport) { \
-		WIZCHIP_WRITE(Sn_DPORT(sn),   (uint8_t) (dport>>8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1), (uint8_t)  dport); \
+#define setSn_DPORT(sn, dport)                                              \
+	{                                                                       \
+		WIZCHIP_WRITE(Sn_DPORT(sn), (uint8_t)(dport >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DPORT(sn), 1), (uint8_t)dport); \
 	}
 
 /**
@@ -1508,7 +1495,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_DPORT()
  */
 #define getSn_DPORT(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1517,9 +1504,10 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint16_t)mss Value to set @ref Sn_MSSR
  * @sa setSn_MSSR()
  */
-#define setSn_MSSR(sn, mss) { \
-		WIZCHIP_WRITE(Sn_MSSR(sn),   (uint8_t)(mss>>8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_MSSR(sn),1), (uint8_t) mss); \
+#define setSn_MSSR(sn, mss)                                              \
+	{                                                                    \
+		WIZCHIP_WRITE(Sn_MSSR(sn), (uint8_t)(mss >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_MSSR(sn), 1), (uint8_t)mss); \
 	}
 
 /**
@@ -1530,7 +1518,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_MSSR()
  */
 #define getSn_MSSR(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_MSSR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_MSSR(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_MSSR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_MSSR(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1540,7 +1528,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_PROTO()
  */
 #define setSn_PROTO(sn, proto) \
-		WIZCHIP_WRITE(Sn_TOS(sn), tos)
+	WIZCHIP_WRITE(Sn_TOS(sn), tos)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1550,7 +1538,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_PROTO()
  */
 #define getSn_PROTO(sn) \
-		WIZCHIP_READ(Sn_TOS(sn))
+	WIZCHIP_READ(Sn_TOS(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1560,7 +1548,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_TOS()
  */
 #define setSn_TOS(sn, tos) \
-		WIZCHIP_WRITE(Sn_TOS(sn), tos)
+	WIZCHIP_WRITE(Sn_TOS(sn), tos)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1570,7 +1558,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_TOS()
  */
 #define getSn_TOS(sn) \
-		WIZCHIP_READ(Sn_TOS(sn))
+	WIZCHIP_READ(Sn_TOS(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1580,7 +1568,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_TTL()
  */
 #define setSn_TTL(sn, ttl) \
-		WIZCHIP_WRITE(Sn_TTL(sn), ttl)
+	WIZCHIP_WRITE(Sn_TTL(sn), ttl)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1590,7 +1578,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_TTL()
  */
 #define getSn_TTL(sn) \
-		WIZCHIP_READ(Sn_TTL(sn))
+	WIZCHIP_READ(Sn_TTL(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1599,9 +1587,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint8_t)rxmemsize Value to set \ref Sn_RXMEM_SIZE
  * @sa getSn_RXMEM_SIZE()
  */
-#define  setSn_RXMEM_SIZE(sn, rxmemsize) \
-      WIZCHIP_WRITE(RMSR, (WIZCHIP_READ(RMSR) & ~(0x03 << (2*sn))) | (rxmemsize << (2*sn)))
-#define  setSn_RXBUF_SIZE(sn,rxmemsize) setSn_RXMEM_SIZE(sn,rxmemsize)
+#define setSn_RXMEM_SIZE(sn, rxmemsize) \
+	WIZCHIP_WRITE(RMSR, (WIZCHIP_READ(RMSR) & ~(0x03 << (2 * sn))) | (rxmemsize << (2 * sn)))
+#define setSn_RXBUF_SIZE(sn, rxmemsize) setSn_RXMEM_SIZE(sn, rxmemsize)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1610,9 +1598,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value of @ref Sn_RXMEM.
  * @sa setSn_RXMEM_SIZE()
  */
-#define  getSn_RXMEM_SIZE(sn) \
-      ((WIZCHIP_READ(RMSR) & (0x03 << (2*sn))) >> (2*sn))
-#define  getSn_RXBUF_SIZE(sn) getSn_RXMEM_SIZE(sn)
+#define getSn_RXMEM_SIZE(sn) \
+	((WIZCHIP_READ(RMSR) & (0x03 << (2 * sn))) >> (2 * sn))
+#define getSn_RXBUF_SIZE(sn) getSn_RXMEM_SIZE(sn)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1622,8 +1610,8 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_TXMEM_SIZE()
  */
 #define setSn_TXMEM_SIZE(sn, txmemsize) \
-      WIZCHIP_WRITE(TMSR, (WIZCHIP_READ(TMSR) & ~(0x03 << (2*sn))) | (txmemsize << (2*sn)))
-#define  setSn_TXBUF_SIZE(sn, txmemsize) setSn_TXMEM_SIZE(sn,txmemsize)
+	WIZCHIP_WRITE(TMSR, (WIZCHIP_READ(TMSR) & ~(0x03 << (2 * sn))) | (txmemsize << (2 * sn)))
+#define setSn_TXBUF_SIZE(sn, txmemsize) setSn_TXMEM_SIZE(sn, txmemsize)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1632,9 +1620,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value of @ref Sn_TXMEM_SIZE.
  * @sa setSn_TXMEM_SIZE()
  */
-#define  getSn_TXMEM_SIZE(sn) \
-      ((WIZCHIP_READ(TMSR) & (0x03 << (2*sn))) >> (2*sn))
-#define  getSn_TXBUF_SIZE(sn) getSn_TXMEM_SIZE(sn)
+#define getSn_TXMEM_SIZE(sn) \
+	((WIZCHIP_READ(TMSR) & (0x03 << (2 * sn))) >> (2 * sn))
+#define getSn_TXBUF_SIZE(sn) getSn_TXMEM_SIZE(sn)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1651,7 +1639,7 @@ uint16_t getSn_TX_FSR(uint8_t sn);
  * @return uint16_t. Value of @ref Sn_TX_RD.
  */
 #define getSn_TX_RD(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_TX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_RD(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_TX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_RD(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1660,10 +1648,11 @@ uint16_t getSn_TX_FSR(uint8_t sn);
  * @param (uint16_t)txwr Value to set @ref Sn_TX_WR
  * @sa GetSn_TX_WR()
  */
-#define setSn_TX_WR(sn, txwr) { \
-		WIZCHIP_WRITE(Sn_TX_WR(sn),   (uint8_t)(txwr>>8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn),1), (uint8_t) txwr); \
-		}
+#define setSn_TX_WR(sn, txwr)                                              \
+	{                                                                      \
+		WIZCHIP_WRITE(Sn_TX_WR(sn), (uint8_t)(txwr >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn), 1), (uint8_t)txwr); \
+	}
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1673,7 +1662,7 @@ uint16_t getSn_TX_FSR(uint8_t sn);
  * @sa setSn_TX_WR()
  */
 #define getSn_TX_WR(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_TX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_TX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1690,9 +1679,10 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param (uint16_t)rxrd Value to set @ref Sn_RX_RD
  * @sa getSn_RX_RD()
  */
-#define setSn_RX_RD(sn, rxrd) { \
-		WIZCHIP_WRITE(Sn_RX_RD(sn),   (uint8_t)(rxrd>>8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn),1), (uint8_t) rxrd); \
+#define setSn_RX_RD(sn, rxrd)                                              \
+	{                                                                      \
+		WIZCHIP_WRITE(Sn_RX_RD(sn), (uint8_t)(rxrd >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn), 1), (uint8_t)rxrd); \
 	}
 
 /**
@@ -1703,7 +1693,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @sa setSn_RX_RD()
  */
 #define getSn_RX_RD(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_RX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_RX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1712,11 +1702,11 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param (uint16_t)rxwr Value to set \ref Sn_RX_WR
  * @sa getSn_RX_WR()
  */
-#define setSn_RX_WR(sn, rxwr) { \
-		WIZCHIP_WRITE(Sn_RX_WR(sn),   (uint8_t)(rxwr>>8)); \
-	   WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn),1), (uint8_t) rxwr); \
+#define setSn_RX_WR(sn, rxwr)                                              \
+	{                                                                      \
+		WIZCHIP_WRITE(Sn_RX_WR(sn), (uint8_t)(rxwr >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn), 1), (uint8_t)rxwr); \
 	}
-
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1725,7 +1715,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Value of @ref Sn_RX_WR.
  */
 #define getSn_RX_WR(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_RX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_RX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1734,9 +1724,10 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param (uint16_t)frag Value to set \ref Sn_FRAG
  * @sa getSn_FRAG()
  */
-#define setSn_FRAG(sn, frag) { \
-		WIZCHIP_WRITE(Sn_FRAG(sn),  (uint8_t)(frag >>8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_FRAG(sn),1), (uint8_t) frag); \
+#define setSn_FRAG(sn, frag)                                              \
+	{                                                                     \
+		WIZCHIP_WRITE(Sn_FRAG(sn), (uint8_t)(frag >> 8));                 \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_FRAG(sn), 1), (uint8_t)frag); \
 	}
 
 /**
@@ -1747,7 +1738,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @sa setSn_FRAG()
  */
 #define getSn_FRAG(sn) \
-		(((uint16_t)WIZCHIP_READ(Sn_FRAG(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_FRAG(sn),1)))
+	(((uint16_t)WIZCHIP_READ(Sn_FRAG(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_FRAG(sn), 1)))
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1756,8 +1747,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_RxMAX(sn) \
-		((uint16_t)(1 << getSn_RXMEM_SIZE(sn)) << 10)
-
+	((uint16_t)(1 << getSn_RXMEM_SIZE(sn)) << 10)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1766,7 +1756,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_TxMAX(sn) \
-		((uint16_t)(1 << getSn_TXMEM_SIZE(sn)) << 10)
+	((uint16_t)(1 << getSn_TXMEM_SIZE(sn)) << 10)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1775,7 +1765,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Mask value
  */
 #define getSn_RxMASK(sn) \
-		(getSn_RxMAX(sn) - 1)
+	(getSn_RxMAX(sn) - 1)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1784,7 +1774,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Mask value
  */
 #define getSn_TxMASK(sn) \
-		(getSn_TxMAX(sn) - 1)
+	(getSn_TxMAX(sn) - 1)
 
 /**
  * @ingroup Socket_register_access_function_W5100
@@ -1852,5 +1842,4 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len);
 
 #endif //_W5100_H_
 
-
-
+#endif

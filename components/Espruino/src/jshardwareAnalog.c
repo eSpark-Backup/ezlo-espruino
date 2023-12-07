@@ -16,10 +16,16 @@
  */
 #include "jshardwareAnalog.h"
 #include "driver/adc.h"
+
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 #include "driver/dac.h"
+#endif
+
 #include "driver/adc_types_deprecated.h"
 #include "driver/adc_deprecated.h"
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 #include "driver/dac_common.h"
+#endif
 
 #include <stdio.h>
 
@@ -121,6 +127,7 @@ int pinToAdcChannelIdx(Pin pin)
   return idx;
 }
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 dac_channel_t pinToDacChannel(Pin pin)
 {
   dac_channel_t channel;
@@ -138,7 +145,7 @@ dac_channel_t pinToDacChannel(Pin pin)
   }
   return channel;
 }
-
+#endif
 void ADCReset()
 {
   initADC(1);
@@ -193,6 +200,7 @@ int readADC(Pin pin)
     return -1;
 }
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 void writeDAC(Pin pin, uint8_t value)
 {
   dac_channel_t channel;
@@ -205,3 +213,4 @@ void writeDAC(Pin pin, uint8_t value)
   if (channel >= 0)
     dac_output_voltage(channel, value);
 }
+#endif

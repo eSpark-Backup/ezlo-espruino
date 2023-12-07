@@ -333,7 +333,11 @@ bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
 
 bool neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize)
 {
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   return esp32_neopixelWrite(pin, rgbData, rgbSize);
+#else
+  return 0;
+#endif
 }
 
 #else

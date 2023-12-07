@@ -76,21 +76,29 @@ int getFreeChannel(Pin pin)
 void timerConfig(int freq, int timer)
 {
   ledc_timer_config_t PWM_timer = {
-      .bit_num = LEDC_TIMER_10_BIT,       // set timer counter bit number
-      .freq_hz = freq,                    // set frequency of pwm
+      .bit_num = LEDC_TIMER_10_BIT, // set timer counter bit number
+      .freq_hz = freq,              // set frequency of pwm
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+      .speed_mode = LEDC_SPEED_MODE_MAX, // timer mode,
+#else
       .speed_mode = LEDC_HIGH_SPEED_MODE, // timer mode,
-      .timer_num = timer                  // timer index
+#endif
+      .timer_num = timer // timer index
   };
   ledc_timer_config(&PWM_timer);
 }
 void channelConfig(int timer, int channel, int value, Pin pin)
 {
   ledc_channel_config_t PWM_channel = {
-      .channel = channel,                 // set LEDC channel 0
-      .duty = value,                      // set the duty for initialization.(duty range is 0 ~ ((2**bit_num)-1)
-      .gpio_num = pin,                    // GPIO number
-      .intr_type = LEDC_INTR_DISABLE,     // GPIO INTR TYPE, as an example, we enable fade_end interrupt here.
-      .speed_mode = LEDC_HIGH_SPEED_MODE, // set LEDC mode, from ledc_mode_t
+      .channel = channel,             // set LEDC channel 0
+      .duty = value,                  // set the duty for initialization.(duty range is 0 ~ ((2**bit_num)-1)
+      .gpio_num = pin,                // GPIO number
+      .intr_type = LEDC_INTR_DISABLE, // GPIO INTR TYPE, as an example, we enable fade_end interrupt here.
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+      .speed_mode = LEDC_SPEED_MODE_MAX, // timer mode,
+#else
+      .speed_mode = LEDC_HIGH_SPEED_MODE, // timer mode,
+#endif
       .timer_sel = timer};
   ledc_channel_config(&PWM_channel);
 }
@@ -148,6 +156,10 @@ void setPWM(Pin pin, uint16_t value)
   }
   else
   {
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+    ledc_set_duty(LEDC_SPEED_MODE_MAX, channel, value);
+#else
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, value);
+#endif
   }
 }

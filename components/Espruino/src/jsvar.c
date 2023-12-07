@@ -27,6 +27,7 @@
 #endif
 
 #include "esp_log.h"
+#include "esp_system.h"
 #ifdef DEBUG
 /** When freeing, clear the references (nextChild/etc) in the JsVar.
  * This means we can assert at the end of jsvFreePtr to make sure
@@ -479,9 +480,9 @@ static JsVarRef jsvInitJsVars(JsVarRef start, unsigned int count)
   {
 
     JsVar *v = jsvGetAddressOf(i);
-    ESP_LOGI("Jsvar", "jsvInitJsVars fool");
-    if (v != NULL)
-      ESP_LOGI("Jsvar", "jsvInitJsVars %d clear flag", i);
+    // ESP_LOGI("Jsvar", "jsvInitJsVars fool");
+    // if (v != NULL)
+    // ESP_LOGI("Jsvar", "jsvInitJsVars %d clear flag", i);
     v->flags = JSV_UNUSED;
 
     // v->locks = 0; // locks is 0 anyway because it is stored in flags
@@ -514,7 +515,20 @@ void jsvInit(unsigned int size)
                            MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 #else
   if (!jsVars)
+  {
+    // Get the free heap size
+    ESP_LOGI("Jsvar", "Free heap size: %u bytes and JsVar Size %d \n", esp_get_minimum_free_heap_size(), sizeof(JsVar));
+
     jsVars = (JsVar *)malloc(sizeof(JsVar) * jsVarsSize);
+    if (jsVars == NULL)
+    {
+      ESP_LOGI("Jsvar", "jsvInit Allocating Memory Failed %d", jsVarsSize);
+    }
+    else
+    {
+      ESP_LOGI("Jsvar", "jsvInit Allocating Memory Successful %d", jsVarsSize);
+    }
+  }
 #endif
 #else
   assert(size == JSVAR_CACHE_SIZE);
@@ -540,6 +554,7 @@ void jsvKill()
   jsVarBlocks = 0;
   jsVarsSize = 0;
 #elif defined(JSVAR_MALLOC)
+  ESP_LOGI("JsVar", "Free Js Variable");
   free(jsVars);
   jsVars = NULL;
   jsVarsSize = 0;

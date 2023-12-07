@@ -210,8 +210,10 @@ BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void IRAM_ATTR espruino_isr(void *para)
 {
   int idx = (int)para;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   if (idx == 0)
   {
+
     TIMERG0.hw_timer[TIMER_0].update = 1;
     TIMERG0.int_clr_timers.t0 = 1;
   }
@@ -220,12 +222,14 @@ void IRAM_ATTR espruino_isr(void *para)
     TIMERG0.hw_timer[TIMER_1].update = 1;
     TIMERG0.int_clr_timers.t1 = 1;
   }
+#endif
   jstUtilTimerInterruptHandler();
 }
 void IRAM_ATTR test_isr(void *para)
 {
   int idx = (int)para;
   printf("x\n");
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   if (idx == 0)
   {
     TIMERG0.hw_timer[TIMER_0].update = 1;
@@ -236,6 +240,7 @@ void IRAM_ATTR test_isr(void *para)
     TIMERG0.hw_timer[TIMER_1].update = 1;
     TIMERG0.int_clr_timers.t1 = 1;
   }
+#endif
 }
 
 void timers_Init()
@@ -299,13 +304,17 @@ void timer_Start(int idx, uint64_t duration)
 {
   timer_enable_intr(ESP32Timers[idx].group, ESP32Timers[idx].index);
   timer_set_alarm_value(ESP32Timers[idx].group, ESP32Timers[idx].index, duration - TIMER_FINE_ADJ);
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   TIMERG0.hw_timer[idx].config.alarm_en = 1;
+#endif
   timer_start(ESP32Timers[idx].group, ESP32Timers[idx].index);
 }
 void timer_Reschedule(int idx, uint64_t duration)
 {
   timer_set_alarm_value(ESP32Timers[idx].group, ESP32Timers[idx].index, duration - TIMER_FINE_ADJ);
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   TIMERG0.hw_timer[idx].config.alarm_en = 1;
+#endif
 }
 void timer_List()
 {

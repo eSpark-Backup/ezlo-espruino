@@ -372,6 +372,7 @@ static int wss_send_internal(char *buf_s, size_t len)
         unsigned char *buf1 = (unsigned char *)malloc(len + 8);
         len = zap_aut(buf, buf1);
         buf = buf1;
+        free(buf1);
     }
 
     do

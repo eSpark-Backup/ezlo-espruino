@@ -21,7 +21,9 @@
 #include "socket.h"
 
 typedef struct sockaddr_in sockaddr_in;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 #define closesocket(SOCK) close(SOCK)
+#endif
 #define MSG_NOSIGNAL 0x4000 /* don't raise SIGPIPE */                 // IGNORED ANYWAY!
 #define send(sock, ptr, len, flags) send(sock, (uint8_t *)(ptr), len) // throw away last arg of send
 #define recv(sock, ptr, len, flags) recv(sock, (uint8_t *)(ptr), len) // throw away last arg of send
@@ -37,10 +39,11 @@ unsigned char wiznetSocketAsServerClient = 0;
 uint8_t net_wiznet_getFreeSocket()
 {
   unsigned int i;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   for (i = 0; i < 8; i++)
     if (getSn_SR(i) == SOCK_CLOSED) // it's free!
       return (uint8_t)i;
-
+#endif
   jsError("No free sockets found\n");
   // out of range will probably just make it error out
   return 8;
@@ -84,19 +87,26 @@ int net_wiznet_createsocket(JsNetwork *net, SocketType socketType, uint32_t host
     { // UDP
       if (port)
         srcPort = port;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       sckt = socket(net_wiznet_getFreeSocket(), Sn_MR_UDP, srcPort, 0); // we set nonblocking later
+#endif
       if (sckt < 0)
         return sckt; // error
     }
     else
-    {                                                                   // TCP/IP
+    { // TCP/IP
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       sckt = socket(net_wiznet_getFreeSocket(), Sn_MR_TCP, srcPort, 0); // we set nonblocking later
+#endif
       if (sckt < 0)
         return sckt; // error
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       res = connect((uint8_t)sckt, (uint8_t *)&host, port);
+#endif
     }
 
-    // now we set nonblocking - so that connect waited for the connection
+// now we set nonblocking - so that connect waited for the connection
+#ifndef CONFIG_IDF_TARGET_ESP32S3
     uint8_t ctl = SOCK_IO_NONBLOCK;
     ctlsocket((uint8_t)sckt, CS_SET_IOMODE, &ctl);
 
@@ -104,13 +114,19 @@ int net_wiznet_createsocket(JsNetwork *net, SocketType socketType, uint32_t host
     {
       jsError("Connect failed (err %d)\n", res);
     }
+#endif
   }
   else
   { // ------------------------------------------------- no host (=server)
+#ifndef CONFIG_IDF_TARGET_ESP32S3
     sckt = socket(net_wiznet_getFreeSocket(), Sn_MR_TCP, port, SF_IO_NONBLOCK);
+
     listen((uint8_t)sckt);
+#endif
   }
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   wiznetSocketPorts[sckt & 7] = port;
+#endif
   // jsiConsolePrintf("Created socket %d\n", sckt);
   return sckt;
 }
@@ -127,8 +143,12 @@ void net_wiznet_closesocket(JsNetwork *net, int sckt)
          jshGetSystemTime() < timeout)
     ;
 #else // W5100 hangs for 30s on disconnect - https://github.com/espruino/Espruino/issues/1306
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   status = getSn_SR((uint8_t)sckt);
 #endif
+#endif
+
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   // if that didn't work, force it
   if (status != SOCK_CLOSED)
     closesocket((uint8_t)sckt);
@@ -141,12 +161,13 @@ void net_wiznet_closesocket(JsNetwork *net, int sckt)
     // Be sure to mark it as not a client socket any more
     wiznetSocketAsServerClient = wiznetSocketAsServerClient & (unsigned char)~(1 << (sckt & 7));
   }
+#endif
 }
 
 /// If the given server socket can accept a connection, return it (or return < 0)
 int net_wiznet_accept(JsNetwork *net, int sckt)
 {
-
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   // On WIZnet the same server socket is reused for clients - keep track so we don't get confused
   // and try and allocate a new HTTP Server Client
   if (wiznetSocketAsServerClient & (1 << sckt))
@@ -173,6 +194,7 @@ int net_wiznet_accept(JsNetwork *net, int sckt)
     // make sure we force-close again and re-init as a listener
     net_wiznet_closesocket(net, (uint16_t)(sckt | WIZNET_SERVER_CLIENT));
   }
+#endif
   return -1;
 }
 
@@ -180,7 +202,7 @@ int net_wiznet_accept(JsNetwork *net, int sckt)
 int net_wiznet_recv(JsNetwork *net, SocketType socketType, int sckt, void *buf, size_t len)
 {
   int num = 0;
-
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   if (socketType & ST_UDP)
   {
     uint16_t dataAvailable;
@@ -209,13 +231,15 @@ int net_wiznet_recv(JsNetwork *net, SocketType socketType, int sckt, void *buf, 
   }
   if (jspIsInterrupted())
     return -1;
+#endif
   return num;
 }
 
 /// Send data if possible. returns nBytes on success, 0 on no data, or -1 on failure
 int net_wiznet_send(JsNetwork *net, SocketType socketType, int sckt, const void *buf, size_t len)
 {
-  int r;
+  int r = 0;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   if (socketType & ST_UDP)
   {
     JsNetUDPPacketHeader *header = (JsNetUDPPacketHeader *)buf;
@@ -227,11 +251,13 @@ int net_wiznet_send(JsNetwork *net, SocketType socketType, int sckt, const void 
   }
   if (jspIsInterrupted())
     return -1;
+#endif
   return r;
 }
 
 void netSetCallbacks_wiznet(JsNetwork *net)
 {
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   net->idle = net_wiznet_idle;
   net->checkError = net_wiznet_checkError;
   net->createsocket = net_wiznet_createsocket;
@@ -241,4 +267,5 @@ void netSetCallbacks_wiznet(JsNetwork *net)
   net->recv = net_wiznet_recv;
   net->send = net_wiznet_send;
   net->chunkSize = 536;
+#endif
 }

@@ -16,9 +16,13 @@
 #ifndef ESP32_NEOPIXEL_H_
 #define ESP32_NEOPIXEL_H_
 #include "jspin.h"
+#include "DeviceConfig.h"
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 //===== neopixel Library
 
-bool esp32_neopixelWrite(Pin pin,unsigned char *rgbData, size_t rgbSize);
+bool esp32_neopixelWrite(Pin pin, unsigned char *rgbData, size_t rgbSize);
+
+#endif
 
 #endif /* ESP32_NEOPIXEL_H_ */

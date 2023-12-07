@@ -140,10 +140,10 @@ uint8_t dns_query(uint8_t ch, uint8_t s, uint8_t *name)
 	uint8_t ip[4];
 	uint16_t len, port;
 	uint16_t cnt;
-
+	uint8_t dns_buf[MAX_DNS_BUF_SIZE];
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 	wiz_NetInfo gWIZNETINFO;
 	ctlnetwork(CN_GET_NETINFO, (void *)&gWIZNETINFO);
-	uint8_t dns_buf[MAX_DNS_BUF_SIZE];
 
 	for (; socket(s, Sn_MR_UDP, (rand() & 32767) + 2000, 0) != s;)
 	{
@@ -177,7 +177,7 @@ uint8_t dns_query(uint8_t ch, uint8_t s, uint8_t *name)
 	// mgg1010 - next line added to ensure socket is closed - without this, it runs out of sockets
 
 	close(s);
-
+#endif
 	//	for(i=0;i<256;i++) PrintString("%02bx ", dns_buf[i]);
 	return (parseMSG(ch, &dhp, dns_buf)); /* Convert to local format */
 }
