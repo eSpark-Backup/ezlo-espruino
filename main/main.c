@@ -74,6 +74,7 @@ static void uartTask(void *data)
     initConsole();
     while (1)
     {
+
         consoleToEspruino();
         serialToEspruino();
     }
@@ -122,6 +123,7 @@ static void espruinoTask(void *data)
     ESP_ERROR_CHECK(esp_task_wdt_status(EspruinoTask));
     while (1)
     {
+        // ESP_LOGI("Main", "Heap Available %d", esp_get_minimum_free_heap_size());
         // Reset the task and each user periodically
         esp_task_wdt_reset();
         jsiLoop(); // Perform the primary loop processing
@@ -192,7 +194,7 @@ void app_main(void)
 
     // wifi_initialize();
     // wifi_connect_from_nvs();
-
+    ESP_LOGI("Main", "Heap Available Internally %d", esp_get_free_internal_heap_size());
     // esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)

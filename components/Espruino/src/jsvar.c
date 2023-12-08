@@ -27,6 +27,7 @@
 #endif
 
 #include "esp_log.h"
+#include "esp_system.h"
 #ifdef DEBUG
 /** When freeing, clear the references (nextChild/etc) in the JsVar.
  * This means we can assert at the end of jsvFreePtr to make sure
@@ -479,10 +480,10 @@ static JsVarRef jsvInitJsVars(JsVarRef start, unsigned int count)
   {
 
     JsVar *v = jsvGetAddressOf(i);
-    ESP_LOGI("Jsvar", "jsvInitJsVars fool");
+    // ESP_LOGI("Jsvar", "jsvInitJsVars fool");
     if (v != NULL)
-      ESP_LOGI("Jsvar", "jsvInitJsVars %d clear flag", i);
-    v->flags = JSV_UNUSED;
+      // ESP_LOGI("Jsvar", "jsvInitJsVars %d clear flag", i);
+      v->flags = JSV_UNUSED;
 
     // v->locks = 0; // locks is 0 anyway because it is stored in flags
     jsvSetNextSibling(v, (JsVarRef)(i + 1)); // link to next
@@ -513,6 +514,7 @@ void jsvInit(unsigned int size)
     jsVars = (JsVar *)mmap(NULL, sizeof(JsVar) * jsVarsSize, PROT_EXEC | PROT_READ | PROT_WRITE,
                            MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 #else
+  ESP_LOGI("jsvInit", "Allocating Memory %d from remaining heap %d", sizeof(JsVar) * jsVarsSize, esp_get_minimum_free_heap_size());
   if (!jsVars)
     jsVars = (JsVar *)malloc(sizeof(JsVar) * jsVarsSize);
 #endif
@@ -540,9 +542,14 @@ void jsvKill()
   jsVarBlocks = 0;
   jsVarsSize = 0;
 #elif defined(JSVAR_MALLOC)
-  free(jsVars);
-  jsVars = NULL;
-  jsVarsSize = 0;
+  if (!jsVars)
+  {
+    free(jsVars);
+    jsVars = NULL;
+    jsVarsSize = 0;
+    ESP_LOGI("jsvInit", "Deallocating Memory %d remaining heap %d", sizeof(JsVar) * jsVarsSize, esp_get_minimum_free_heap_size());
+  }
+
 #endif
 }
 
