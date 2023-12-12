@@ -127,7 +127,9 @@ static void espruinoTask(void *data)
         // Reset the task and each user periodically
         esp_task_wdt_reset();
         jsiLoop(); // Perform the primary loop processing
+#ifdef BLUETOOTH
         gatts_sendNUSNotificationIfNotEmpty();
+#endif
     }
 }
 
@@ -177,25 +179,25 @@ static void main_task(void *pv)
 
 void app_main(void)
 {
-
+    esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
 #if !CONFIG_ESP_TASK_WDT_INIT
     // If the TWDT was not initialized automatically on startup, manually intialize it now
     ESP_ERROR_CHECK(esp_task_wdt_init(TWDT_TIMEOUT_MS, false));
     printf("TWDT initialized\n");
 #endif
-    // gpio_install_isr_service(0);
+    gpio_install_isr_service(0);
     // qt_serial_init();
-    // factory_info_init();
-    // nvs_storage_init();
-    // devices_common_init_devices();
-    // interface_common_init();
-    // switch_service_init();
-    // GATT_SERVER_MAIN();
+    factory_info_init();
+    nvs_storage_init();
+    devices_common_init_devices();
+    interface_common_init();
+    switch_service_init();
+    GATT_SERVER_MAIN();
 
-    // wifi_initialize();
+    wifi_initialize();
     // wifi_connect_from_nvs();
     ESP_LOGI("Main", "Heap Available Internally %d", esp_get_free_internal_heap_size());
-    // esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
+
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {

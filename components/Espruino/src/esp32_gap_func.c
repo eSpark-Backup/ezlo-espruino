@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 #include "esp_wifi.h"
-
+#ifdef BLUETOOTH
 #include "esp32_gap_func.h"
 #include "esp32_gatts_func.h"
 #include "esp32_bluetooth_utils.h"
@@ -403,3 +403,4 @@ void gap_init_security()
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
 }
+#endif

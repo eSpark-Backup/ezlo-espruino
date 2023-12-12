@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include "esp_log.h"
 
+#include "DeviceConfig.h"
+
+#if USE_BLUETOOTH == 1
 #include "esp_gattc_api.h"
 #include "esp32_gattc_func.h"
 #include "esp32_bluetooth_utils.h"
@@ -403,3 +406,4 @@ void gattc_characteristicNotify(uint16_t charHandle, uint16_t cccdHandle, bool e
   }
   jsble_check_error((uint32_t)ret);
 }
+#endif

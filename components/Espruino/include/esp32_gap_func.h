@@ -15,13 +15,10 @@
 #define GAP_FUNC_H_
 
 #include "DeviceConfig.h"
-#if BLUETOOTH == 1
+#if USE_BLUETOOTH == 1
 #include "esp_gap_ble_api.h"
-#endif
 #include "jsvar.h"
-#if BLUETOOTH == 1
 #include "bluetooth.h"
-#endif
 
 #define BLE_DEVICE_NAME "BLE_DEV_N"
 
@@ -38,5 +35,6 @@ esp_err_t bluetooth_gap_setAdvertising(JsVar *advArray);
 JsVar *bluetooth_gap_getAdvertisingData(JsVar *data, JsVar *options);
 
 void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
+#endif
 
 #endif /* GAP_FUNC_H_ */

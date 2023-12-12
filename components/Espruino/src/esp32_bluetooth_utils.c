@@ -11,7 +11,7 @@
  * ESP32 specific Bluetooth utils
  * ----------------------------------------------------------------------------
  */
-
+#ifdef BLUETOOTH
 #include "esp32_bluetooth_utils.h"
 #include "esp32_gap_func.h"
 #include <esp_gap_ble_api.h>
@@ -602,3 +602,4 @@ void espbtaddr_TO_bleaddr(esp_bd_addr_t remote_bda, esp_ble_addr_type_t remote_b
   // BLE_GAP_ADDR_TYPES and esp_ble_addr_type_t match (no need for conversion)
   ble_addr->addr_type = remote_bda_type;
 }
+#endif

@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "DeviceConfig.h"
+#if USE_BLUETOOTH == 1
 #include "esp_system.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
@@ -813,3 +814,5 @@ void gatts_reset(bool removeValues)
     }
   }
 }
+
+#endif

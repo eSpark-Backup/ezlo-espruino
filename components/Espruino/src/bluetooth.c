@@ -13,6 +13,7 @@
  */
 #include <stdio.h>
 
+#if USE_BLUETOOTH == 1
 #include "esp_bt.h"
 #include "esp_bt_main.h"
 #include "esp_gatt_common_api.h"
@@ -375,3 +376,5 @@ uint32_t jsble_central_send_passkey(uint16_t central_conn_handle, char *passkey)
   jsWarn("central set Whitelist not implemented yet\n");
   return 0;
 }
+
+#endif

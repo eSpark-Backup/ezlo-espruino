@@ -164,8 +164,8 @@ void jshPinDefaultPullup()
  */
 void jshInit()
 {
-  if (ESP32_Get_NVS_Status(ESP_NETWORK_WIFI))
-    esp32_wifi_init();
+  // if (ESP32_Get_NVS_Status(ESP_NETWORK_WIFI))
+  //   esp32_wifi_init();
 #ifdef BLUETOOTH
   ESP_LOGI("Jshardware", "jshInit");
   if (ESP32_Get_NVS_Status(ESP_NETWORK_BLE))

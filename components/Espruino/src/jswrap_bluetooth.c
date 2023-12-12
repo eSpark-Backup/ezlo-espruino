@@ -9,6 +9,9 @@
  * the file.
  *
  */
+#include "DeviceConfig.h"
+
+#if USE_BLUETOOTH == 1
 
 #include "jswrap_bluetooth.h"
 #include "jsinteractive.h"
@@ -759,11 +762,11 @@ JsVar *jswrap_ble_getAddress()
 #endif
   return jsvVarPrintf("%02x:%02x:%02x:%02x:%02x:%02x",
                       ((addr1 >> 8) & 0xFF) | 0xC0,
-                      ((addr1)&0xFF),
+                      ((addr1) & 0xFF),
                       ((addr0 >> 24) & 0xFF),
                       ((addr0 >> 16) & 0xFF),
                       ((addr0 >> 8) & 0xFF),
-                      ((addr0)&0xFF));
+                      ((addr0) & 0xFF));
 }
 
 /*JSON{
@@ -1043,7 +1046,9 @@ void jswrap_ble_setAdvertising(JsVar *data, JsVar *options)
 //         jsiConsolePrintf("FIXME\n");
 #endif
 #ifdef ESP32
+#if USE_BLUETOOTH == 1
         bluetooth_setDeviceName(v);
+#endif
 #endif
         jsble_check_error(err_code);
       }
@@ -1135,7 +1140,9 @@ void jswrap_ble_setAdvertising(JsVar *data, JsVar *options)
   if (isAdvertising)
     jsble_advertising_stop();
 #ifdef ESP32
+#if USE_BLUETOOTH == 1
   err_code = bluetooth_gap_setAdvertising(advArray);
+#endif
 #endif
   jsble_check_error(err_code);
   if (isAdvertising)
@@ -4878,3 +4885,4 @@ JsVar *jswrap_ble_BluetoothRemoteGATTCharacteristic_stopNotifications(JsVar *cha
   return 0;
 #endif
 }
+#endif

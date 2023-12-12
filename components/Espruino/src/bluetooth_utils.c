@@ -23,11 +23,14 @@
 #include "app_error.h"
 #endif
 #ifdef ESP32
+#ifdef BLUETOOTH
 #include "esp_bt.h"
 #include "esp_gattc_api.h"
 #include "esp32_bluetooth_utils.h"
 #endif
+#endif
 
+#if USE_BLUETOOTH == 1
 /// Return true if two UUIDs are equal
 bool bleUUIDEqual(ble_uuid_t a, ble_uuid_t b)
 {
@@ -531,3 +534,4 @@ bool jsble_exec_pending_common(BLEPending blep, uint16_t data, unsigned char *bu
   }
   return true;
 }
+#endif

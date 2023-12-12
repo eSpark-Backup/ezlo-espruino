@@ -12,28 +12,31 @@
  * ----------------------------------------------------------------------------
  */
 #include "jspin.h"
+#include "DeviceConfig.h"
 #include "bluetooth.h"
 
+#ifdef BLUETOOTH
 // ------------------------------------------------------------------------------
-typedef enum {
+typedef enum
+{
   BLETASK_NONE,
-  BLETASK_REQUEST_DEVICE, ///< Waiting for requestDevice to finish (bleTaskInfo=index of a setTimeout to stop scanning)
-  BLETASK_CENTRAL_START, // =========================================== Start of central tasks
-  BLETASK_CONNECT = BLETASK_CENTRAL_START, ///< Connect in central mode (bleTaskInfo=BluetoothRemoteGATTServer)
-  BLETASK_DISCONNECT, ///< Disconnect from Central (bleTaskInfo=BluetoothRemoteGATTServer)
-  BLETASK_PRIMARYSERVICE, ///< Find primary service (bleTaskInfo=BluetoothDevice, bleTaskInfo2=populated with list of BluetoothRemoteGATTService)
-  BLETASK_CHARACTERISTIC,  ///< Find characteristics (bleTaskInfo=BluetoothRemoteGATTService, bleTaskInfo2=populated with list of BluetoothRemoteGATTCharacteristic)
-  BLETASK_CHARACTERISTIC_WRITE, ///< Write to a characteristic (bleTaskInfo=0)
-  BLETASK_CHARACTERISTIC_READ, ///< Read from a characteristic (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
-  BLETASK_CHARACTERISTIC_DESC_AND_STARTNOTIFY, ///< Discover descriptors and start notifications (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
-  BLETASK_CHARACTERISTIC_NOTIFY, ///< Setting whether notifications are on or off (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
-  BLETASK_BONDING, ///< Try and bond in central mode (bleTaskInfo=BluetoothRemoteGATTServer for central, or 0 for peripheral)
+  BLETASK_REQUEST_DEVICE,                              ///< Waiting for requestDevice to finish (bleTaskInfo=index of a setTimeout to stop scanning)
+  BLETASK_CENTRAL_START,                               // =========================================== Start of central tasks
+  BLETASK_CONNECT = BLETASK_CENTRAL_START,             ///< Connect in central mode (bleTaskInfo=BluetoothRemoteGATTServer)
+  BLETASK_DISCONNECT,                                  ///< Disconnect from Central (bleTaskInfo=BluetoothRemoteGATTServer)
+  BLETASK_PRIMARYSERVICE,                              ///< Find primary service (bleTaskInfo=BluetoothDevice, bleTaskInfo2=populated with list of BluetoothRemoteGATTService)
+  BLETASK_CHARACTERISTIC,                              ///< Find characteristics (bleTaskInfo=BluetoothRemoteGATTService, bleTaskInfo2=populated with list of BluetoothRemoteGATTCharacteristic)
+  BLETASK_CHARACTERISTIC_WRITE,                        ///< Write to a characteristic (bleTaskInfo=0)
+  BLETASK_CHARACTERISTIC_READ,                         ///< Read from a characteristic (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
+  BLETASK_CHARACTERISTIC_DESC_AND_STARTNOTIFY,         ///< Discover descriptors and start notifications (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
+  BLETASK_CHARACTERISTIC_NOTIFY,                       ///< Setting whether notifications are on or off (bleTaskInfo=BluetoothRemoteGATTCharacteristic)
+  BLETASK_BONDING,                                     ///< Try and bond in central mode (bleTaskInfo=BluetoothRemoteGATTServer for central, or 0 for peripheral)
   BLETASK_CENTRAL_END = BLETASK_CHARACTERISTIC_NOTIFY, // ============= End of central tasks
 #ifdef ESPR_BLUETOOTH_ANCS
-  BLETASK_ANCS_NOTIF_ATTR,             //< Apple Notification Centre notification attributes (bleTaskInfo=0)
-  BLETASK_ANCS_APP_ATTR,               //< Apple Notification Centre app attributes (bleTaskInfo=appId string)
-  BLETASK_AMS_ATTR,                    //< Apple Media Service track info request (bleTaskInfo=0)
-  BLETASK_CTS_GET_TIME,                //< CMS get current time
+  BLETASK_ANCS_NOTIF_ATTR, //< Apple Notification Centre notification attributes (bleTaskInfo=0)
+  BLETASK_ANCS_APP_ATTR,   //< Apple Notification Centre app attributes (bleTaskInfo=appId string)
+  BLETASK_AMS_ATTR,        //< Apple Media Service track info request (bleTaskInfo=0)
+  BLETASK_CTS_GET_TIME,    //< CMS get current time
 #endif
 } BleTask;
 
@@ -44,14 +47,13 @@ typedef enum {
 #endif
 
 // Is this task related to BLE central mode?
-#define BLETASK_IS_CENTRAL(x) ((x)>=BLETASK_CENTRAL_START && ((x)<=BLETASK_CENTRAL_END))
+#define BLETASK_IS_CENTRAL(x) ((x) >= BLETASK_CENTRAL_START && ((x) <= BLETASK_CENTRAL_END))
 #ifdef ESPR_BLUETOOTH_ANCS
-#define BLETASK_IS_ANCS(x) ((x)==BLETASK_ANCS_NOTIF_ATTR || ((x)==BLETASK_ANCS_APP_ATTR))
-#define BLETASK_IS_AMS(x) ((x)==BLETASK_AMS_ATTR)
+#define BLETASK_IS_ANCS(x) ((x) == BLETASK_ANCS_NOTIF_ATTR || ((x) == BLETASK_ANCS_APP_ATTR))
+#define BLETASK_IS_AMS(x) ((x) == BLETASK_AMS_ATTR)
 #endif
 
-
-extern JsVar *bleTaskInfo; // info related to the current task
+extern JsVar *bleTaskInfo;  // info related to the current task
 extern JsVar *bleTaskInfo2; // info related to the current task
 
 const char *bleGetTaskString(BleTask task);
@@ -64,7 +66,7 @@ void bleCompleteTaskFail(BleTask task, JsVar *data);
 void bleCompleteTaskFailAndUnLock(BleTask task, JsVar *data);
 void bleSwitchTask(BleTask task);
 
-#if CENTRAL_LINK_COUNT>0
+#if CENTRAL_LINK_COUNT > 0
 // Set the currently active GATT server based on the index in m_central_conn_handles
 void bleSetActiveBluetoothGattServer(int idx, JsVar *var);
 // Get the currently active GATT server based on the index in m_central_conn_handles (the return value needs unlocking)
@@ -85,7 +87,6 @@ void jswrap_ble_dumpBluetoothInitialisation(vcbprintf_callback user_callback, vo
 /** Reconfigure the softdevice (on init or after restart) to have all the services/advertising we need */
 void jswrap_ble_reconfigure_softdevice();
 // ------------------------------------------------------------------------------
-
 
 void jswrap_ble_disconnect();
 void jswrap_ble_sleep();
@@ -157,3 +158,4 @@ JsVar *jswrap_ble_BluetoothRemoteGATTCharacteristic_writeValue(JsVar *characteri
 JsVar *jswrap_ble_BluetoothRemoteGATTCharacteristic_readValue(JsVar *characteristic);
 JsVar *jswrap_ble_BluetoothRemoteGATTCharacteristic_startNotifications(JsVar *characteristic);
 JsVar *jswrap_ble_BluetoothRemoteGATTCharacteristic_stopNotifications(JsVar *characteristic);
+#endif
