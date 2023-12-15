@@ -1,0 +1,11 @@
+Following are the limitations we have with current build for Ezlopi with Espruino
+1. Ezlopi UART implementation:
+	 Currently espruino uart is only configured for 256 bytes, whereas Ezlopi is configured with 6184 bytes and both uses console uart which can make data corruption also on Ezlopi uart reads
+	 data in seperate thread then that data is passed to tx_task
+2. BLUETOOTH Limitation:
+	 Espruino uses Bluetooth drivers to perform bluetooth activity and Ezlopi also uses bluetooth to communicate with console for which it uses device in server and client mode. Therefore currently
+	 I have turned off Espruino bluetooth activity for now.
+3. OTA not enabled:
+	 Due to memory issue for ESP32 with 4MB and current partition of espruino i have excluded ota partition
+4. WiFi:
+	 Some of the functions of Esp32 WiFi is not operational need to look into espruino for it as WiFi object is not getting recognized

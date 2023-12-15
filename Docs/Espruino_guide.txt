@@ -1,0 +1,103 @@
+Espruino is an open-source JavaScript interpreter specifically designed for microcontrollers. It enables the development of embedded systems using JavaScript, allowing for easy programming and interaction with hardware components. For the ESP32, Espruino offers a platform to write JavaScript code that runs directly on the microcontroller, enabling rapid prototyping and development of IoT (Internet of Things) projects.
+
+With Espruino on ESP32, you can leverage the power of JavaScript to control GPIO pins, interact with sensors, manage networking protocols like Wi-Fi, and build various IoT applications without the need for traditional embedded programming languages. It simplifies the development process by providing a familiar language for web developers to work with hardware, making it accessible for a broader range of enthusiasts and professionals alike.
+
+Espruino's ease of use, compatibility with various microcontrollers, and its ability to execute JavaScript directly on hardware make it a popular choice for IoT and embedded systems development, especially for those with a background in web development.
+
+/******************************************************************/
+			  References
+/******************************************************************/
+
+Espruino WebIDE: https://www.espruino.com/ide/
+
+Espruino Quickstart guide: https://www.espruino.com/Quick+Start+Code
+
+Espruino Getting started for esp32: https://www.espruino.com/ESP32
+
+Espruino API reference: https://www.espruino.com/Reference#I2C
+
+/******************************************************************/
+			  Espruino Setup:
+/******************************************************************/
+1. Open Espruino WebIDE using above Link
+2. Click on Gear icon to open settings -> COMMUNICATIONS -> Change Baudrate to 115200 -> click on Cross to close menu
+3. Connect Esp32 to System -> Click on Web Serial and choose your COM port, you can verify yours using Device Manager -> Ports
+4. Once connected you can now program using terminal line by line or upload script to Esp32
+
+/******************************************************************/
+			 Tested Examples
+/******************************************************************/
+
+Note: RAM Upload will not save the code to flash, whereas Flash upload will save the code to flash memory
+	-> RAM upload will first run the code then show espruino logo, but in flash upload it will reset the device then run last uploaded code
+
+*. console.log(1+2); // will print result 3 you can try any combination
+*. console.log("string"); // will print string you want to save
+*. console.log("string", 2); // will print string2
+
+*. digitalWrite(LED1,1); // Will turn ON, on board LED1 
+Note: LED1 is defined in configuration therefore we can use it directly, otherwise it will show error
+
+we can also try D14.set(); to set GPIO14 high and D14.reset(); to set GPIO14 to low, Similarly, we can use with other GPIOs
+
+Examples:
+/******************************************************************/
+			 LED Toggle example
+/******************************************************************/
+Summary:  This example toggles the LED on GPIO 2 at 500ms
+var on = false;
+function toggle() {
+ on = !on;
+ digitalWrite(LED1, on);
+}
+
+toggle();
+var i = setInterval(toggle, 500);
+
+Note:
+reset(), when controller reaches to this point it will clear previously uploaded script 
+
+/******************************************************************/
+			 WiFi connectivity example
+/******************************************************************/
+
+Summary: This example connects to WiFi network provided, but to make it work we need to Flash upload it because WiFi functionality requires reboot
+var ssid = 'YOUR_SSID';
+var password = 'YOUR_SSID_PASSWORD';
+
+var wifi = require('Wifi');
+wifi.connect(ssid, {password: password}, function() {
+    console.log('Connected to Wifi.  IP address is:', wifi.getIP().ip);
+    wifi.save(); // Next reboot will auto-connect
+});
+
+/******************************************************************/
+			 GPIO read example
+/******************************************************************/
+
+Summary: this example reads GPIO 14 status using GPIO 25 for this to work you need to connect GPIO 14 with GPIO 25 using jumper, it will result as below
+Before: false 
+After: true
+
+D14.mode('output');
+D25.mode('input');
+console.log('Before: ', D25.read());
+D14.set();                  // Set the D14 pin to output a HIGH value.
+console.log('After: ', D25.read());
+
+/******************************************************************/
+			 Serial2 write example
+/******************************************************************/
+Summary: this example prints at UART2 for this use UART to ttl to connect with serial terminal
+This will output:
+	Hello UART
+Serial2.setup(9600, { tx: D4, rx: D15 });
+Serial2.on('data', function(data) {
+    console.log('Serial2: ', data);
+});
+Serial2.print('Hello UART');
+
+/******************************************************************/
+			 Reboot Esp32 example
+/******************************************************************/
+ESP32.reboot()

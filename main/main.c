@@ -61,6 +61,7 @@
 
 TaskHandle_t EspruinoTask;
 TaskHandle_t UartTask;
+TaskHandle_t EzlopiTask;
 
 extern void *espruino_stackHighPtr; // Name spaced because this has to be a global variable.
                                     // Used in jsuGetFreeStack().
@@ -143,12 +144,13 @@ static void main_task(void *pv)
 {
     char url[128];
     s_factory_info_t *factory = factory_info_get_info();
-
+    ESP_ERROR_CHECK(esp_task_wdt_add(EzlopiTask));
+    ESP_ERROR_CHECK(esp_task_wdt_status(EzlopiTask));
     while (1)
     {
         char *ws_endpoint = NULL;
         struct json_token wss_uri_tok = JSON_INVALID_TOKEN;
-
+        esp_task_wdt_reset();
         wait_for_wifi_to_connect();
 
         snprintf(url, 128, "%s/getserver?json=true", factory->cloud_server);
@@ -237,7 +239,7 @@ void app_main(void)
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, &UartTask, 0);
 #endif
 
-    // xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, NULL);
+    xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, &EzlopiTask);
     // xTaskCreate(blinky, "blinky", 2048, NULL, 1, NULL);
 }
 
