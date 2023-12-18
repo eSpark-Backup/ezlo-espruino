@@ -162,6 +162,7 @@ typedef union _un_l2cval
 Function Prototype Definition Part
 ********************************************************************************
 */
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 extern void send_DHCP_DISCOVER(uint8_t s, wiz_NetInfo *pWIZNETINFO);
 extern void send_DHCP_REQUEST(uint8_t s, uint8_t *Cip, uint8_t *d_addr, wiz_NetInfo *pWIZNETINFO);
 extern void send_DHCP_REREQUEST(uint8_t s, wiz_NetInfo *pWIZNETINFO);
@@ -174,7 +175,7 @@ extern void check_Timeout(uint8_t s, wiz_NetInfo *pWIZNETINFO);
 extern int8_t check_leasedIP(uint8_t s, wiz_NetInfo *pWIZNETINFO);
 
 extern int8_t parseDHCPMSG(uint8_t s, uint16_t length, wiz_NetInfo *pWIZNETINFO);
-
+#endif
 extern uint8_t setHostname(char *);
 extern char *getHostname();
 char nibbleToHex(uint8_t nibble);

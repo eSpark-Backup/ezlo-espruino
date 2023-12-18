@@ -56,6 +56,7 @@
 #include "jsparse.h"
 #include "socket.h"
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 // M20150401 : Typing Error
 // #define SOCK_ANY_PORT_NUM  0xC000;
 #define SOCK_ANY_PORT_NUM 0xC000
@@ -1012,3 +1013,5 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void *arg)
    }
    return SOCK_OK;
 }
+
+#endif

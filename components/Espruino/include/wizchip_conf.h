@@ -54,6 +54,7 @@
 #ifndef _WIZCHIP_CONF_H_
 #define _WIZCHIP_CONF_H_
 
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 #include <stdint.h>
 /**
  * @brief Select WIZCHIP.
@@ -309,7 +310,7 @@ typedef enum
 #if _WIZCHIP_ == 5500
    IK_WOL = (1 << 4), ///< Wake On Lan by receiving the magic packet. Valid in W500.
 #elif _WIZCHIP_ == 5300
-   IK_FMTU = (1 << 4),       ///< Received a ICMP message (Fragment MTU)
+   IK_FMTU = (1 << 4), ///< Received a ICMP message (Fragment MTU)
 #endif
 
    IK_PPPOE_TERMINATED = (1 << 5), ///< PPPoE Disconnected
@@ -618,3 +619,4 @@ void wizchip_settimeout(wiz_NetTimeout *nettime);
 void wizchip_gettimeout(wiz_NetTimeout *nettime);
 
 #endif // _WIZCHIP_CONF_H_
+#endif

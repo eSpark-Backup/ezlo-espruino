@@ -66,6 +66,7 @@ Function Implementation Part
 * Note       :
 *********************************************************************************************************
 */
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 void send_DHCP_DISCOVER(uint8_t s, wiz_NetInfo *pWIZNETINFO)
 {
 	uint16_t i;
@@ -913,7 +914,7 @@ uint8_t getIP_DHCPS(uint8_t s, wiz_NetInfo *pWIZNETINFO)
 	}
 	return 1;
 }
-
+#endif
 uint8_t setHostname(char *hostname)
 {
 	strcpy((char *)HOST_NAME, hostname);

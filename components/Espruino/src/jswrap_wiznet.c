@@ -91,6 +91,7 @@ Library for communication with the WIZnet Ethernet module
 }
 Initialise the WIZnet module and return an Ethernet object
 */
+#ifndef CONFIG_IDF_TARGET_ESP32S3
 JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs)
 {
 
@@ -140,6 +141,7 @@ JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs)
   jshPinOutput(net.data.pinCS, 1); // de-assert CS
 
   // Initialise WIZnet functions
+
   reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
   reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
 
@@ -173,6 +175,7 @@ JsVar *jswrap_wiznet_connect(JsVar *spi, Pin cs)
 
   return ethObj;
 }
+#endif
 
 /*JSON{
   "type" : "class",
@@ -208,7 +211,7 @@ JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback)
   JsNetwork net;
   if (!networkGetFromVar(&net))
     return 0;
-
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   wiz_NetInfo gWIZNETINFO;
   ctlnetwork(CN_GET_NETINFO, (void *)&gWIZNETINFO);
 
@@ -237,6 +240,9 @@ JsVar *jswrap_ethernet_getIP(JsVar *wlanObj, JsVar *callback)
   }
 
   return data;
+#else
+  return 0;
+#endif
 }
 
 static void _eth_getIP_set_address(JsVar *options, char *name, unsigned char *ptr)
@@ -284,6 +290,7 @@ bool jswrap_ethernet_setIP(JsVar *wlanObj, JsVar *options, JsVar *callback)
     return false;
 
   const char *errorMessage = 0;
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   wiz_NetInfo gWIZNETINFO;
 
   ctlnetwork(CN_GET_NETINFO, (void *)&gWIZNETINFO);
@@ -338,7 +345,7 @@ bool jswrap_ethernet_setIP(JsVar *wlanObj, JsVar *options, JsVar *callback)
   }
 
   ctlnetwork(CN_SET_NETINFO, (void *)&gWIZNETINFO);
-
+#endif
   networkFree(&net);
 
   // Schedule callback if a function was provided
@@ -457,7 +464,7 @@ JsVar *jswrap_ethernet_getStatus(JsVar *wlanObj, JsVar *callback)
   JsVar *jsStatus = jsvNewObject();
 
   jsvObjectSetChildAndUnLock(jsStatus, "state", jsvNewFromString(state[networkState]));
-
+#ifndef CONFIG_IDF_TARGET_ESP32S3
   ctlwizchip(CW_GET_ID, (void *)tmpstr);
   jsvObjectSetChildAndUnLock(jsStatus, "id", jsvNewFromString((char *)tmpstr));
 
@@ -475,7 +482,7 @@ JsVar *jswrap_ethernet_getStatus(JsVar *wlanObj, JsVar *callback)
   jsvObjectSetChildAndUnLock(jsStatus, "speed", tmpPhycConf.speed ? jsvNewFromInteger(10) : jsvNewFromInteger(100));
   jsvObjectSetChildAndUnLock(jsStatus, "duplex", jsvNewFromInteger(tmpPhycConf.duplex));
 #endif
-
+#endif
   networkFree(&net);
 
   // Schedule callback if a function was provided
