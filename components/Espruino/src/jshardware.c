@@ -59,6 +59,7 @@
 #include "esp_log.h"
 #include "jshardwareI2c.h"
 #include "jshardwareSpi.h"
+#include "esp_debug_helpers.h"
 
 #define FLASH_MAX (4 * 1024 * 1024)                  // 4MB
 #define FLASH_PAGE_SHIFT 12                          // Shift is much faster than division by 4096 (size of page)
@@ -154,8 +155,8 @@ void jshPinDefaultPullup()
   jshPinSetStateRange(0, 0, JSHPINSTATE_GPIO_IN_PULLUP);
   jshPinSetStateRange(12, 15, JSHPINSTATE_GPIO_IN_PULLUP);
   jshPinSetStateRange(18, 19, JSHPINSTATE_GPIO_IN_PULLUP);
-  jshPinSetStateRange(21, 22, JSHPINSTATE_GPIO_IN_PULLUP);
-  jshPinSetStateRange(25, 27, JSHPINSTATE_GPIO_IN_PULLUP);
+  jshPinSetStateRange(21, 21, JSHPINSTATE_GPIO_IN_PULLUP);
+  jshPinSetStateRange(26, 27, JSHPINSTATE_GPIO_IN_PULLUP);
   jshPinSetStateRange(34, 39, JSHPINSTATE_GPIO_IN_PULLUP);
 }
 
@@ -290,6 +291,8 @@ void jshPinSetState(
     JshPinState state //!< The new desired state of the pin.
 )
 {
+  // esp_backtrace_print(5);
+  // printf("Setting Pin %d with state %d\n\r", pin, state);
   /* Make sure we kill software PWM if we set the pin state
    * after we've started it */
   if (BITFIELD_GET(jshPinSoftPWM, pin))

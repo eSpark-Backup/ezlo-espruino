@@ -185,7 +185,7 @@ void app_main(void)
 #if !CONFIG_ESP_TASK_WDT_INIT
     // If the TWDT was not initialized automatically on startup, manually intialize it now
     ESP_ERROR_CHECK(esp_task_wdt_init(TWDT_TIMEOUT_MS, false));
-    printf("TWDT initialized\n");
+    // printf("TWDT initialized\n");
 #endif
     gpio_install_isr_service(0);
     // qt_serial_init();
@@ -216,6 +216,7 @@ void app_main(void)
     // Map the js_code partition into memory so can be accessed by E.setBootCode("")
     const esp_partition_t *part;
     spi_flash_mmap_handle_t hrom;
+    printf("TWDT initialized\n");
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "js_code");
     if (it == 0)
         jsError("Couldn't find js_code partition - update with partition_espruino.bin\n");

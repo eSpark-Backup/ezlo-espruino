@@ -79,7 +79,7 @@ void timerConfig(int freq, int timer)
       .bit_num = LEDC_TIMER_10_BIT, // set timer counter bit number
       .freq_hz = freq,              // set frequency of pwm
 #ifdef CONFIG_IDF_TARGET_ESP32S3
-      .speed_mode = LEDC_SPEED_MODE_MAX, // timer mode,
+      .speed_mode = LEDC_LOW_SPEED_MODE, // timer mode,
 #else
       .speed_mode = LEDC_HIGH_SPEED_MODE, // timer mode,
 #endif
