@@ -1,0 +1,15 @@
+Ram Upload:
+
+.reset();
+.print()
+.setTime(1704130136.867);E.setTimeZone(5)
+..[3dconsole.log("Hello from Pakistan Hello from Pakistan", 3);
+
+Flash Upload: 
+.reset();
+.print()
+.setTime(1704130627.953);E.setTimeZone(5)
+..[1drequire("Storage").write(".bootcde","\n\nconsole.log(\"Hello from Pakistan Hello from Pakistan\", 3);\n",0,61);
+..[2dload()
+
+Debugging .bootcde memory erase part
