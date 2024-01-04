@@ -75,7 +75,6 @@ static void uartTask(void *data)
     initConsole();
     while (1)
     {
-
         consoleToEspruino();
         serialToEspruino();
     }
@@ -181,7 +180,7 @@ static void main_task(void *pv)
 
 void app_main(void)
 {
-    esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
+    // esp_log_level_set("*", ESP_LOG_ERROR); // set all components to ERROR level - suppress Wifi Info
 #if !CONFIG_ESP_TASK_WDT_INIT
     // If the TWDT was not initialized automatically on startup, manually intialize it now
     ESP_ERROR_CHECK(esp_task_wdt_init(TWDT_TIMEOUT_MS, false));

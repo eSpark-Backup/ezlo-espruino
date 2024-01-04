@@ -851,5 +851,6 @@ gpio_num_t pinToESP32Pin(Pin pin)
 /// Perform a proper hard-reboot of the device
 void jshReboot()
 {
+  esp_backtrace_print(10);
   esp_restart(); // Call the ESP-IDF to restart the ESP32.
 }

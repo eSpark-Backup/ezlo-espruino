@@ -123,7 +123,10 @@ void consoleToEspruino()
 {
   int len = uart_read_bytes(uart_console, rxbuf, sizeof(rxbuf), 100); // Read data from UART
   if (len > 0)
+  {
+    ESP_LOGI("Data", "Received Data %s", (char *)rxbuf);
     jshPushIOCharEvents(EV_SERIAL1, &rxbuf, len);
+  }
 }
 
 void serialToEspruino()

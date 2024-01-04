@@ -156,10 +156,12 @@ static uint32_t jsfAlignAddress(uint32_t addr)
 
 JsfFileName jsfNameFromString(const char *name)
 {
+  ESP_LOGI("jsflash", "jsfNameFromString | get name from String");
   assert(strlen(name) <= sizeof(JsfFileName));
   char nameBuf[sizeof(JsfFileName) + 1];
   memset(nameBuf, 0, sizeof(nameBuf));
   strcpy(nameBuf, name);
+  ESP_LOGI("jsflash", "jsfNameFromString | got name from String %s", nameBuf);
   return *(JsfFileName *)nameBuf;
 }
 
@@ -1558,18 +1560,23 @@ void jsfLoadStateFromFlash()
 
 void jsfSaveBootCodeToFlash(JsVar *code, bool runAfterReset)
 {
-  jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE));
+  bool fileErased = jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE));
+  ESP_LOGI("jsflash", "jsfSaveBootCodeToFlash | erase file %d", fileErased);
   jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET));
   if (jsvIsUndefined(code) || jsvGetLength(code) == 0)
     return;
-  jsfWriteFile(jsfNameFromString(runAfterReset ? SAVED_CODE_BOOTCODE_RESET : SAVED_CODE_BOOTCODE), code, JSFF_NONE, 0, 0);
+  fileErased = jsfWriteFile(jsfNameFromString(runAfterReset ? SAVED_CODE_BOOTCODE_RESET : SAVED_CODE_BOOTCODE), code, JSFF_NONE, 0, 0);
+  ESP_LOGI("jsflash", "jsfSaveBootCodeToFlash | Write file %d", fileErased);
 }
 
 JsVar *jsfGetBootCodeFromFlash(bool isReset)
 {
+  ESP_LOGI("jsflash", "jsfGetBootCodeFromFlash | get boot file name ");
   JsVar *resetCode = jsfReadFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET), 0, 0);
+  ESP_LOGI("jsflash", "jsfGetBootCodeFromFlash | check file");
   if (isReset || resetCode)
     return resetCode;
+  ESP_LOGI("jsflash", "jsfGetBootCodeFromFlash | check file ");
   return jsfReadFile(jsfNameFromString(SAVED_CODE_BOOTCODE), 0, 0);
 }
 
@@ -1613,23 +1620,29 @@ bool jsfLoadBootCodeFromFlash(bool isReset)
 
 bool jsfFlashContainsCode()
 {
-  return
+  bool filePresent;
+
 #ifndef ESPR_NO_VARIMAGE
-      jsfFindFile(jsfNameFromString(SAVED_CODE_VARIMAGE), 0) ||
+  filePresent = jsfFindFile(jsfNameFromString(SAVED_CODE_VARIMAGE), 0) ||
 #endif
-      jsfFindFile(jsfNameFromString(SAVED_CODE_BOOTCODE), 0) ||
-      jsfFindFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET), 0);
+                jsfFindFile(jsfNameFromString(SAVED_CODE_BOOTCODE), 0) ||
+                jsfFindFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET), 0);
+  ESP_LOGI("jsflash", "jsfFlashContainsCode | check file %d", filePresent);
+  return filePresent;
 }
 
 /** Completely clear any saved code from flash. */
 void jsfRemoveCodeFromFlash()
 {
+  bool fileerased;
+  ESP_LOGI("jsflash", "jsfRemoveCodeFromFlash | Erasing saved code. ");
   jsiConsolePrint("Erasing saved code.");
 #ifndef ESPR_NO_VARIMAGE
   jsfEraseFile(jsfNameFromString(SAVED_CODE_VARIMAGE));
 #endif
-  jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE));
-  jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET));
+  fileerased = jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE));
+  fileerased = jsfEraseFile(jsfNameFromString(SAVED_CODE_BOOTCODE_RESET));
+  ESP_LOGI("jsflash", "jsfRemoveCodeFromFlash | Erasing saved code. %d ", fileerased);
   jsiConsolePrint("\nDone!\n");
 }
 

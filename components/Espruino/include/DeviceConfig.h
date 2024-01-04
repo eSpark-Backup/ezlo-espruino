@@ -1,6 +1,7 @@
 #ifndef EZLO_ESPRUINO_BOARD_H
 #define EZLO_ESPRUINO_BOARD_H
 
+#include "esp_log.h"
 #define BLE_42_FEATURE_SUPPORT false
 #define BLE_50_FEATURE_SUPPORT false
 
