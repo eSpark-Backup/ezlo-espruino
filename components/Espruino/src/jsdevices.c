@@ -15,6 +15,7 @@
 #include "jsparse.h"
 #include "jsinteractive.h"
 #include "jswrapper.h"
+#include "DeviceConfig.h"
 #ifdef BLUETOOTH
 #include "bluetooth.h"
 #endif
@@ -526,7 +527,6 @@ void jshPushIOCharEvent(
   evt.flags = channel;
   IOEVENTFLAGS_SETCHARS(evt.flags, 1);
   evt.data.chars[0] = charData;
-  ESP_LOGI("jsdevices", "jshPushIOCharEvent Received Data %s", &evt.data.chars[0]);
   jshPushEvent(&evt);
   // Set flow control (as we're going to use more data)
   jshPushIOCharEventFlowControl(channel);
@@ -537,7 +537,10 @@ void jshPushIOCharEvents(IOEventFlags channel, char *data, unsigned int count)
   // TODO: optimise me!
   unsigned int i;
   for (i = 0; i < count; i++)
+  {
+    ESP_LOGI("", "%c", data[i]);
     jshPushIOCharEvent(channel, data[i]);
+  }
 }
 
 /* Signal an IO watch event as having happened.

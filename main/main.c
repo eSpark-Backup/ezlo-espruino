@@ -47,6 +47,8 @@
 #include "jswrap_wifi.h" // jswrap_wifi_restore
 #include "jswrapper.h"
 
+#include "DeviceConfig.h"
+
 #ifdef BLUETOOTH
 #include "bluetooth.h"
 #include "esp32_gap_func.h"
@@ -186,16 +188,16 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_task_wdt_init(TWDT_TIMEOUT_MS, false));
     // printf("TWDT initialized\n");
 #endif
-    gpio_install_isr_service(0);
+    // gpio_install_isr_service(0);
     // qt_serial_init();
-    factory_info_init();
-    nvs_storage_init();
-    devices_common_init_devices();
-    interface_common_init();
-    switch_service_init();
-    GATT_SERVER_MAIN();
+    // factory_info_init();
+    // nvs_storage_init();
+    // devices_common_init_devices();
+    // interface_common_init();
+    // switch_service_init();
+    // GATT_SERVER_MAIN();
 
-    wifi_initialize();
+    // wifi_initialize();
     // wifi_connect_from_nvs();
     ESP_LOGI("Main", "Heap Available Internally %d", esp_get_free_internal_heap_size());
 
@@ -239,7 +241,7 @@ void app_main(void)
     xTaskCreatePinnedToCore(&uartTask, "uartTask", 2200, NULL, 20, &UartTask, 0);
 #endif
 
-    xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, &EzlopiTask);
+    // xTaskCreate(main_task, "main task", 20 * 1024, NULL, 2, &EzlopiTask);
     // xTaskCreate(blinky, "blinky", 2048, NULL, 1, NULL);
 }
 

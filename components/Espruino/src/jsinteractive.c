@@ -2281,6 +2281,7 @@ int jsiHandleIOEventForSerial(JsVar *usartClass, IOEvent *event)
 
 void jsiHandleIOEventForConsole(IOEvent *event)
 {
+  // ESP_LOGI("jsinteractive", "Return Data");
   int i, c = IOEVENTFLAGS_GETCHARS(event->flags);
   jsiSetBusy(BUSY_INTERACTIVE, true);
   for (i = 0; i < c; i++)
@@ -2312,6 +2313,7 @@ void jsiIdle()
     loopsIdling = 0; // because we're not idling
     if (eventType == consoleDevice)
     {
+      // ESP_LOGI("jsiIdle", "jsiIdle %d", eventType);
       jsiHandleIOEventForConsole(&event);
       /** don't allow us to read data when the device is our
        console device. It slows us down and just causes pain. */

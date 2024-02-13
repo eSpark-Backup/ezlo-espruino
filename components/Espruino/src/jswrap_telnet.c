@@ -175,6 +175,7 @@ bool jswrap_telnet_idle(void)
   if (tnSrv.sock <= 0)
   {
     memset(&tnSrv, 0, sizeof(TelnetServer));
+
     telnetStart(&net);
     if (tnSrv.sock <= 0)
     {

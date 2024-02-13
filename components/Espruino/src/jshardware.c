@@ -23,7 +23,7 @@
  * functions should follow the expected conventions.
  */
 #include <stdio.h>
-
+#include "DeviceConfig.h"
 #include "jshardware.h"
 #include "jshardwareUart.h"
 #include "jshardwareAnalog.h"
@@ -199,8 +199,9 @@ void jshReset()
   ADCReset();
   SPIReset();
   I2CReset();
-#ifdef BLUETOOTH
   ESP_LOGI("Jshardware", "jshReset");
+#ifdef BLUETOOTH
+
   if (ESP32_Get_NVS_Status(ESP_NETWORK_BLE))
     gatts_reset(false);
 #endif
@@ -761,7 +762,11 @@ void jshFlashWrite(
     uint32_t len   //!< Length of data to write
 )
 {
-  spi_flash_write(addr, buf, len);
+  uint32_t buffer[256] = {0};
+  ESP_LOGI("jshFlashWrite", "Writting to 0x%X, the buffer is %s with length %d", addr, (char *)buf, len);
+  ESP_LOGI("jshFlashWrite", "Error Code Writing to flash %d", spi_flash_write(addr, buf, len));
+  spi_flash_read(addr, buffer, 4);
+  ESP_LOGI("jshFlashWrite", "Read %s at addr 0x%X", (char *)buffer, addr);
 }
 
 /**

@@ -415,8 +415,8 @@ typedef int64_t JsSysTime;
 
 // To handle variable size bit fields
 #define BITFIELD_DECL(BITFIELD, N) uint32_t BITFIELD[((N) + 31) / 32]
-#define BITFIELD_GET(BITFIELD, N) ((BITFIELD[(N) >> 5] >> ((N)&31)) & 1)
-#define BITFIELD_SET(BITFIELD, N, VALUE) (BITFIELD[(N) >> 5] = (BITFIELD[(N) >> 5] & (uint32_t) ~(1 << ((N)&31))) | (uint32_t)((VALUE) ? (1 << ((N)&31)) : 0))
+#define BITFIELD_GET(BITFIELD, N) ((BITFIELD[(N) >> 5] >> ((N) & 31)) & 1)
+#define BITFIELD_SET(BITFIELD, N, VALUE) (BITFIELD[(N) >> 5] = (BITFIELD[(N) >> 5] & (uint32_t) ~(1 << ((N) & 31))) | (uint32_t)((VALUE) ? (1 << ((N) & 31)) : 0))
 #define BITFIELD_CLEAR(BITFIELD) memset(BITFIELD, 0, sizeof(BITFIELD)) ///< Clear all elements
 
 // Array of 4 bit values - returns unsigned
@@ -501,10 +501,10 @@ void jsAssertFail(const char *file, int line, const char *expr);
 #if (defined DEBUG) || (defined __FILE__ == DEBUG_FILE)
 #define jsDebug(dbg_type, format, ...) jsiConsolePrintf("[" __FILE__ "]:" format, ##__VA_ARGS__)
 #else
-#define jsDebug(dbg_type, format, ...) \
-  do                                   \
-  {                                    \
-  } while (0)
+#define jsDebug(dbg_type, format, ...) ESP_LOGI(dbg_type, format, ##__VA_ARGS__)
+// do
+// {
+// } while (0)
 #endif
 
 #ifndef USE_FLASH_MEMORY

@@ -13,6 +13,7 @@
  */
 #include <stdio.h>
 
+#include "DeviceConfig.h"
 #if USE_BLUETOOTH == 1
 #include "esp_bt.h"
 #include "esp_bt_main.h"

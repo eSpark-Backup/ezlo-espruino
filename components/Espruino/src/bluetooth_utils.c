@@ -11,7 +11,7 @@
  * Utilities for converting Nordic datastructures to Espruino and vice versa
  * ----------------------------------------------------------------------------
  */
-
+#include "DeviceConfig.h"
 #include "bluetooth_utils.h"
 #include "jsvariterator.h"
 #include "jsinteractive.h"

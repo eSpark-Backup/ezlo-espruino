@@ -11,6 +11,8 @@
  * ESP32 specific Bluetooth utils
  * ----------------------------------------------------------------------------
  */
+#include "DeviceConfig.h"
+
 #ifdef BLUETOOTH
 #include "esp32_bluetooth_utils.h"
 #include "esp32_gap_func.h"

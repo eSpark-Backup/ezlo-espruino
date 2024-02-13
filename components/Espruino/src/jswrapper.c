@@ -2322,8 +2322,10 @@ bool jswIdle()
     wasBusy = true;
   if (jswrap_net_idle())
     wasBusy = true;
+#if 0
   if (jswrap_telnet_idle())
     wasBusy = true;
+#endif
 #ifdef BLUETOOTH
   if (jswrap_ble_idle())
     wasBusy = true;

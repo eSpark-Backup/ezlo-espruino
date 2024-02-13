@@ -775,15 +775,18 @@ void jsfGetDriveBankAddress(char drive, uint32_t *bankStartAddr, uint32_t *bankE
 /// Create a new 'file' in the memory store - DOES NOT remove existing files with same name. Return the address of data start, or 0 on error
 static uint32_t jsfCreateFile(JsfFileName name, uint32_t size, JsfFileFlags flags, JsfFileHeader *returnedHeader)
 {
-  jsDebug(DBG_INFO, "CreateFile (%d bytes)\n", size);
+  jsDebug(DBG_INFO, "CreateFile (%d bytes) %s\n", size, name.c);
   char drive = jsfStripDriveFromName(&name, false /* ensure .js/etc go in C */);
+  ESP_LOGI("DBG_INFO", "DriveName: %c\n", drive);
   jsfCacheClearFile(name);
   uint32_t bankStartAddress, bankEndAddress;
   jsfGetDriveBankAddress(drive, &bankStartAddress, &bankEndAddress);
+  ESP_LOGI("DBG_INFO", "Start Address: 0x%X| End Address 0x%X\n", bankStartAddress, bankEndAddress);
   /* TODO: do we want to start our scan from jsfFilenameTableBank1Addr to
    * make writing files faster? */
 
   uint32_t requiredSize = jsfAlignAddress(size) + (uint32_t)sizeof(JsfFileHeader);
+  ESP_LOGI("DBG_INFO", "Required Size : %d\n", requiredSize);
   bool compacted = false;
   uint32_t addr = 0;
   JsfFileHeader header;
@@ -839,7 +842,7 @@ static uint32_t jsfCreateFile(JsfFileName name, uint32_t size, JsfFileFlags flag
   jsDebug(DBG_INFO, "CreateFile new 0x%08x\n", addr + (uint32_t)sizeof(JsfFileHeader));
   header.size = size | (flags << 24);
   header.name = name;
-  jsDebug(DBG_INFO, "CreateFile write header\n");
+  jsDebug(DBG_INFO, "CreateFile write header with name %s\n", header.name.c);
   jshFlashWrite(&header, addr, (uint32_t)sizeof(JsfFileHeader));
   jsDebug(DBG_INFO, "CreateFile written header\n");
   if (returnedHeader)
@@ -1205,6 +1208,7 @@ bool jsfWriteFile(JsfFileName name, JsVar *data, JsfFileFlags flags, JsVarInt of
   uint32_t size = (uint32_t)_size;
   // Data length
   JSV_GET_AS_CHAR_ARRAY(dPtr, dLen, data);
+  // ESP_LOGI("JsFlash", "Writting Data %s to file name %s", *dPtr, name.c);
   if (!dPtr)
   {
     jsExceptionHere(JSET_ERROR, "Can't get pointer to data to write");
@@ -1612,8 +1616,10 @@ bool jsfLoadBootCodeFromFlash(bool isReset)
   }
   // Load normal boot code
   JsVar *code = jsfGetBootCodeFromFlash(isReset);
+  ESP_LOGI("JSFlash", "Check if code present");
   if (!code)
     return false;
+  ESP_LOGI("JSFlash", "code present");
   jsvUnLock2(jspEvaluateVar(code, 0, 0), code);
   return true;
 }
